@@ -384,6 +384,96 @@ const Settings = () => {
           </Button>
         </div>
       </form>
+
+      {/* Confirmation Message Settings */}
+      <form onSubmit={handleConfirmationSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Mensagem de Confirmação
+            </CardTitle>
+            <CardDescription>
+              Configure o envio automático de mensagens de confirmação
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="confirmationEnabled"
+                checked={confirmationSettings.enabled}
+                onCheckedChange={(checked) =>
+                  setConfirmationSettings(prev => ({ ...prev, enabled: checked }))
+                }
+              />
+              <Label htmlFor="confirmationEnabled" className="text-sm font-medium">
+                Ativar mensagens de confirmação automáticas
+              </Label>
+            </div>
+
+            {confirmationSettings.enabled && (
+              <>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Quando enviar</Label>
+                    <Select
+                      value={confirmationSettings.timing}
+                      onValueChange={(value) =>
+                        setConfirmationSettings(prev => ({ ...prev, timing: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="previous_day">Dia anterior ao agendamento</SelectItem>
+                        <SelectItem value="morning">Manhã do dia do agendamento</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="sendTime">Horário de envio</Label>
+                    <Input
+                      id="sendTime"
+                      type="time"
+                      value={confirmationSettings.sendTime}
+                      onChange={(e) =>
+                        setConfirmationSettings(prev => ({ ...prev, sendTime: e.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="customMessage">Mensagem personalizada</Label>
+                  <Textarea
+                    id="customMessage"
+                    value={confirmationSettings.customMessage}
+                    onChange={(e) =>
+                      setConfirmationSettings(prev => ({ ...prev, customMessage: e.target.value }))
+                    }
+                    placeholder="Digite a mensagem que será enviada para confirmar o agendamento..."
+                    rows={4}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Se deixar em branco, será usada a mensagem padrão do sistema
+                  </p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            disabled={isLoading || !confirmationSettings.enabled}
+            className="bg-gradient-to-r from-secondary to-secondary-hover px-8"
+          >
+            {isLoading ? "Salvando..." : "Salvar Configurações de Confirmação"}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Store, Users, Scissors, Settings, TrendingUp } from "lucide-react";
+import { Store, Users, Scissors, Settings, TrendingUp, UserPlus, Calendar } from "lucide-react";
+import ClientsManagement from "@/components/ClientsManagement";
+import AppointmentDetails from "@/components/AppointmentDetails";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [currentView, setCurrentView] = useState<'dashboard' | 'clients' | 'appointments'>('dashboard');
 
   const stats = [
     {
@@ -53,13 +57,28 @@ const Dashboard = () => {
       color: "from-secondary to-secondary-hover",
     },
     {
+      title: "Clientes Fixos",
+      description: "Cadastre clientes com agendamentos automáticos",
+      icon: UserPlus,
+      action: () => setCurrentView('clients'),
+      color: "from-warning to-warning",
+    },
+    {
       title: "Configurações Gerais",
       description: "Ajuste notificações, integrações e mais",
       icon: Settings,
       action: () => navigate("/dashboard/settings"),
-      color: "from-warning to-warning",
+      color: "from-muted-foreground to-muted-foreground",
     },
   ];
+
+  if (currentView === 'clients') {
+    return <ClientsManagement onBack={() => setCurrentView('dashboard')} />;
+  }
+
+  if (currentView === 'appointments') {
+    return <AppointmentDetails onBack={() => setCurrentView('dashboard')} />;
+  }
 
   return (
     <div className="space-y-8">
@@ -73,7 +92,15 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">
         {stats.map((stat) => (
-          <Card key={stat.title} className="shadow-md">
+          <Card 
+            key={stat.title} 
+            className="shadow-md cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => {
+              if (stat.title === "Agendamentos Hoje") {
+                setCurrentView('appointments');
+              }
+            }}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {stat.title}
@@ -85,10 +112,44 @@ const Dashboard = () => {
               <p className="text-xs text-muted-foreground">
                 {stat.description}
               </p>
+              {stat.title === "Agendamentos Hoje" && (
+                <p className="text-xs text-primary mt-1">
+                  Clique para ver detalhes
+                </p>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Clients Overview */}
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Clientes Cadastrados
+          </CardTitle>
+          <CardDescription>
+            Visualização rápida dos clientes do salão
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-2xl font-bold">248</p>
+              <p className="text-sm text-muted-foreground">Total de clientes</p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentView('clients')}
+              className="flex items-center gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              Ver Todos
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <div>
