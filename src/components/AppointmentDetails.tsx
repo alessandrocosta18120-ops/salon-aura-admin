@@ -3,9 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, User, Phone, MessageSquare } from "lucide-react";
+import { ArrowLeft, Clock, User, Phone, MessageSquare, ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
 import { appointmentApi } from "@/lib/api";
+import { format, addDays, subDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface Appointment {
   id: string;
@@ -23,25 +27,41 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sendReminderToProfessional, setSendReminderToProfessional] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   useEffect(() => {
-    loadTodayAppointments();
-  }, []);
+    loadAppointments(selectedDate);
+  }, [selectedDate]);
 
-  const loadTodayAppointments = async () => {
+  const loadAppointments = async (date: Date) => {
+    setIsLoading(true);
     try {
-      const response = await appointmentApi.getToday();
+      const response = await appointmentApi.getByDate(format(date, 'yyyy-MM-dd'));
       if (response.success) {
         setAppointments(response.data || []);
       }
     } catch (error) {
       toast({
         title: "Erro ao carregar agendamentos",
-        description: "Não foi possível carregar os agendamentos de hoje.",
+        description: "Não foi possível carregar os agendamentos.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePreviousDay = () => {
+    setSelectedDate(prev => subDays(prev, 1));
+  };
+
+  const handleNextDay = () => {
+    setSelectedDate(prev => addDays(prev, 1));
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
     }
   };
 
@@ -101,13 +121,52 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
           <ArrowLeft className="h-4 w-4" />
           Voltar
         </Button>
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Agendamentos de Hoje</h2>
+        <div className="flex-1">
+          <h2 className="text-3xl font-bold tracking-tight">Agendamentos</h2>
           <p className="text-muted-foreground">
-            Detalhamento completo dos agendamentos do dia
+            Detalhamento completo dos agendamentos
           </p>
         </div>
       </div>
+
+      {/* Date Navigation */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between gap-4">
+            <Button variant="outline" size="icon" onClick={handlePreviousDay}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <div className="flex items-center gap-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(selectedDate, "PPP", { locale: ptBR })}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <Button variant="outline" onClick={() => setSelectedDate(new Date())}>
+                Hoje
+              </Button>
+            </div>
+
+            <Button variant="outline" size="icon" onClick={handleNextDay}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Professional Reminder Setting */}
       <Card>

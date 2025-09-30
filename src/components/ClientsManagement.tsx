@@ -52,6 +52,13 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
   // Reminder message for churned clients
   const [reminderMessage, setReminderMessage] = useState('');
   const [selectedChurned, setSelectedChurned] = useState<string[]>([]);
+  const [churnedPeriod, setChurnedPeriod] = useState('3'); // months
+  const [reminderMethod, setReminderMethod] = useState<'sms' | 'whatsapp' | 'both'>('both');
+  
+  // Broadcast message for registered clients
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [broadcastMethod, setBroadcastMethod] = useState<'sms' | 'whatsapp' | 'both'>('both');
+  const [selectedClients, setSelectedClients] = useState<string[]>([]);
 
   useEffect(() => {
     loadData();
@@ -137,13 +144,14 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
     try {
       const response = await clientApi.sendReminder({
         clientIds: selectedChurned,
-        message: reminderMessage
+        message: reminderMessage,
+        method: reminderMethod
       });
       
       if (response.success) {
         toast({
           title: "Lembretes enviados!",
-          description: `Mensagens enviadas para ${selectedChurned.length} clientes.`,
+          description: `Mensagens enviadas para ${selectedChurned.length} clientes via ${reminderMethod === 'both' ? 'SMS e WhatsApp' : reminderMethod.toUpperCase()}.`,
         });
         setSelectedChurned([]);
         setReminderMessage('');
@@ -152,6 +160,40 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
       toast({
         title: "Erro ao enviar",
         description: "Não foi possível enviar os lembretes.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSendBroadcast = async () => {
+    if (selectedClients.length === 0 || !broadcastMessage) {
+      toast({
+        title: "Dados incompletos",
+        description: "Selecione clientes e digite uma mensagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await clientApi.sendBroadcast({
+        clientIds: selectedClients,
+        message: broadcastMessage,
+        method: broadcastMethod
+      });
+      
+      if (response.success) {
+        toast({
+          title: "Mensagens enviadas!",
+          description: `Mensagens enviadas para ${selectedClients.length} clientes via ${broadcastMethod === 'both' ? 'SMS e WhatsApp' : broadcastMethod.toUpperCase()}.`,
+        });
+        setSelectedClients([]);
+        setBroadcastMessage('');
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao enviar",
+        description: "Não foi possível enviar as mensagens.",
         variant: "destructive",
       });
     }
@@ -209,41 +251,101 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
 
       {/* Registered Clients */}
       {activeTab === 'registered' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Clientes Cadastrados</CardTitle>
-            <CardDescription>
-              Lista de todos os clientes por ordem alfabética
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p>Carregando...</p>
-            ) : (
-              <div className="space-y-2">
-                {clients.map((client) => (
-                  <div key={client.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{client.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Último agendamento: {client.lastVisit}
-                      </p>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Clientes Cadastrados</CardTitle>
+              <CardDescription>
+                Lista de todos os clientes por ordem alfabética
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <p>Carregando...</p>
+              ) : (
+                <div className="space-y-2">
+                  {clients.map((client) => (
+                    <div key={client.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                      <Checkbox
+                        checked={selectedClients.includes(client.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedClients(prev => [...prev, client.id]);
+                          } else {
+                            setSelectedClients(prev => prev.filter(id => id !== client.id));
+                          }
+                        }}
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium">{client.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Último agendamento: {client.lastVisit}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{client.phone}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{client.phone}</span>
-                    </div>
-                  </div>
-                ))}
-                {clients.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">
-                    Nenhum cliente cadastrado
-                  </p>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))}
+                  {clients.length === 0 && (
+                    <p className="text-center text-muted-foreground py-8">
+                      Nenhum cliente cadastrado
+                    </p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {clients.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Enviar Mensagem em Massa</CardTitle>
+                <CardDescription>
+                  Envie felicitações, promoções, avisos gerais e datas comemorativas
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Método de Envio</Label>
+                  <Select
+                    value={broadcastMethod}
+                    onValueChange={(value: 'sms' | 'whatsapp' | 'both') => setBroadcastMethod(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sms">Apenas SMS</SelectItem>
+                      <SelectItem value="whatsapp">Apenas WhatsApp</SelectItem>
+                      <SelectItem value="both">SMS e WhatsApp</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="broadcastMessage">Mensagem</Label>
+                  <textarea
+                    id="broadcastMessage"
+                    value={broadcastMessage}
+                    onChange={(e) => setBroadcastMessage(e.target.value)}
+                    placeholder="Digite sua mensagem promocional, felicitação ou aviso geral..."
+                    rows={4}
+                    className="w-full p-3 border border-input rounded-md resize-none"
+                  />
+                </div>
+                <Button
+                  onClick={handleSendBroadcast}
+                  disabled={selectedClients.length === 0 || !broadcastMessage}
+                  className="w-full"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Enviar para {selectedClients.length} Cliente(s) Selecionado(s)
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
 
       {/* Fixed Clients */}
@@ -370,9 +472,36 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
         <div className="space-y-6">
           <Card>
             <CardHeader>
+              <CardTitle>Configuração de Período</CardTitle>
+              <CardDescription>
+                Defina o período de inatividade para identificar clientes evadidos
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="churnedPeriod">Clientes que não agendaram há</Label>
+                <Input
+                  id="churnedPeriod"
+                  type="number"
+                  min="1"
+                  max="12"
+                  value={churnedPeriod}
+                  onChange={(e) => setChurnedPeriod(e.target.value)}
+                  className="w-20"
+                />
+                <span>meses</span>
+                <Button onClick={loadData} variant="outline">
+                  Atualizar Lista
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Clientes Evadidos</CardTitle>
               <CardDescription>
-                Clientes que não agendaram nos últimos 3 meses
+                Clientes que não agendaram nos últimos {churnedPeriod} meses
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -415,6 +544,22 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
+                  <Label>Método de Envio</Label>
+                  <Select
+                    value={reminderMethod}
+                    onValueChange={(value: 'sms' | 'whatsapp' | 'both') => setReminderMethod(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sms">Apenas SMS</SelectItem>
+                      <SelectItem value="whatsapp">Apenas WhatsApp</SelectItem>
+                      <SelectItem value="both">SMS e WhatsApp</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="reminderMessage">Mensagem de Lembrete</Label>
                   <textarea
                     id="reminderMessage"
@@ -430,6 +575,7 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
                   disabled={selectedChurned.length === 0 || !reminderMessage}
                   className="w-full"
                 >
+                  <MessageSquare className="h-4 w-4 mr-2" />
                   Enviar para {selectedChurned.length} Cliente(s) Selecionado(s)
                 </Button>
               </CardContent>

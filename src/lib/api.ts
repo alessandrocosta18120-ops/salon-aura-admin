@@ -75,6 +75,7 @@ export const scheduleApi = {
 export const appointmentApi = {
   get: () => apiCall('getadmappointments'),
   getToday: () => apiCall('getadmappointmentstoday'),
+  getByDate: (date: string) => apiCall('getadmappointmentsbydate', { date }),
   set: (data: any) => apiCall('setadmappointments', data, 'POST'),
 };
 
@@ -85,6 +86,7 @@ export const clientApi = {
   setFixed: (data: any) => apiCall('setadmfixedclients', data, 'POST'),
   getChurned: () => apiCall('getadmchurnedclients'),
   sendReminder: (data: any) => apiCall('sendclientreminder', data, 'POST'),
+  sendBroadcast: (data: any) => apiCall('sendclientbroadcast', data, 'POST'),
 };
 
 // Settings APIs

@@ -20,7 +20,7 @@ interface SettingsData {
   sendSocialLinks: boolean;
   confirmationMessage: string;
   twoFactorAuth: boolean;
-  notificationMethod: "email" | "whatsapp" | "both";
+  notificationMethod: "sms" | "whatsapp" | "both";
   
   // Cancelamentos
   minCancelDays: number;
@@ -203,9 +203,9 @@ const Settings = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="email">Apenas E-mail</SelectItem>
+                  <SelectItem value="sms">Apenas SMS</SelectItem>
                   <SelectItem value="whatsapp">Apenas WhatsApp</SelectItem>
-                  <SelectItem value="both">E-mail e WhatsApp</SelectItem>
+                  <SelectItem value="both">SMS e WhatsApp</SelectItem>
                 </SelectContent>
               </Select>
             </div>
