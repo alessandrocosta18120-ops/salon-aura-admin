@@ -59,6 +59,13 @@ const Settings = () => {
     dateFormat: "dd/MM/yyyy",
   });
 
+  const [confirmationSettings, setConfirmationSettings] = useState({
+    enabled: false,
+    timing: "previous_day",
+    sendTime: "18:00",
+    customMessage: ""
+  });
+
   useEffect(() => {
     loadSettings();
   }, []);
@@ -104,6 +111,35 @@ const Settings = () => {
       toast({
         title: "Erro ao salvar",
         description: "Não foi possível salvar as configurações.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleConfirmationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch("../admin/api/setconfirmationsettings", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(confirmationSettings)
+      // });
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      toast({
+        title: "Configurações de confirmação salvas!",
+        description: "As configurações de confirmação foram atualizadas.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as configurações de confirmação.",
         variant: "destructive",
       });
     } finally {
