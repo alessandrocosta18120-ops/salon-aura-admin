@@ -208,7 +208,7 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
           <Card>
             <CardContent className="py-8">
               <p className="text-center text-muted-foreground">
-                Nenhum agendamento para hoje
+                Nenhum agendamento para esta data
               </p>
             </CardContent>
           </Card>

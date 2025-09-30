@@ -298,53 +298,68 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
             </CardContent>
           </Card>
 
-          {clients.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Enviar Mensagem em Massa</CardTitle>
-                <CardDescription>
-                  Envie felicitações, promoções, avisos gerais e datas comemorativas
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Método de Envio</Label>
-                  <Select
-                    value={broadcastMethod}
-                    onValueChange={(value: 'sms' | 'whatsapp' | 'both') => setBroadcastMethod(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sms">Apenas SMS</SelectItem>
-                      <SelectItem value="whatsapp">Apenas WhatsApp</SelectItem>
-                      <SelectItem value="both">SMS e WhatsApp</SelectItem>
-                    </SelectContent>
-                  </Select>
+          <Card>
+            <CardHeader>
+              <CardTitle>Enviar Mensagem em Massa</CardTitle>
+              <CardDescription>
+                Envie felicitações, promoções, avisos gerais e datas comemorativas
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Método de Envio</Label>
+                <div className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="broadcast-sms"
+                      checked={broadcastMethod === 'sms' || broadcastMethod === 'both'}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setBroadcastMethod(broadcastMethod === 'whatsapp' ? 'both' : 'sms');
+                        } else {
+                          setBroadcastMethod(broadcastMethod === 'both' ? 'whatsapp' : 'sms');
+                        }
+                      }}
+                    />
+                    <Label htmlFor="broadcast-sms" className="cursor-pointer">SMS</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="broadcast-whatsapp"
+                      checked={broadcastMethod === 'whatsapp' || broadcastMethod === 'both'}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setBroadcastMethod(broadcastMethod === 'sms' ? 'both' : 'whatsapp');
+                        } else {
+                          setBroadcastMethod(broadcastMethod === 'both' ? 'sms' : 'whatsapp');
+                        }
+                      }}
+                    />
+                    <Label htmlFor="broadcast-whatsapp" className="cursor-pointer">WhatsApp</Label>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="broadcastMessage">Mensagem</Label>
-                  <textarea
-                    id="broadcastMessage"
-                    value={broadcastMessage}
-                    onChange={(e) => setBroadcastMessage(e.target.value)}
-                    placeholder="Digite sua mensagem promocional, felicitação ou aviso geral..."
-                    rows={4}
-                    className="w-full p-3 border border-input rounded-md resize-none"
-                  />
-                </div>
-                <Button
-                  onClick={handleSendBroadcast}
-                  disabled={selectedClients.length === 0 || !broadcastMessage}
-                  className="w-full"
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Enviar para {selectedClients.length} Cliente(s) Selecionado(s)
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="broadcastMessage">Mensagem</Label>
+                <textarea
+                  id="broadcastMessage"
+                  value={broadcastMessage}
+                  onChange={(e) => setBroadcastMessage(e.target.value)}
+                  placeholder="Digite sua mensagem promocional, felicitação ou aviso geral..."
+                  rows={6}
+                  className="w-full p-3 border border-input rounded-md resize-none"
+                />
+              </div>
+              <Button
+                onClick={handleSendBroadcast}
+                disabled={selectedClients.length === 0 || !broadcastMessage}
+                className="w-full"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Enviar para {selectedClients.length} Cliente(s) Selecionado(s)
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -534,53 +549,68 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
             </CardContent>
           </Card>
 
-          {churnedClients.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Enviar Lembrete</CardTitle>
-                <CardDescription>
-                  Mensagem para atrair clientes evadidos de volta ao salão
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Método de Envio</Label>
-                  <Select
-                    value={reminderMethod}
-                    onValueChange={(value: 'sms' | 'whatsapp' | 'both') => setReminderMethod(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sms">Apenas SMS</SelectItem>
-                      <SelectItem value="whatsapp">Apenas WhatsApp</SelectItem>
-                      <SelectItem value="both">SMS e WhatsApp</SelectItem>
-                    </SelectContent>
-                  </Select>
+          <Card>
+            <CardHeader>
+              <CardTitle>Enviar Lembrete</CardTitle>
+              <CardDescription>
+                Mensagem para atrair clientes evadidos de volta ao salão
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Método de Envio</Label>
+                <div className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="reminder-sms"
+                      checked={reminderMethod === 'sms' || reminderMethod === 'both'}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setReminderMethod(reminderMethod === 'whatsapp' ? 'both' : 'sms');
+                        } else {
+                          setReminderMethod(reminderMethod === 'both' ? 'whatsapp' : 'sms');
+                        }
+                      }}
+                    />
+                    <Label htmlFor="reminder-sms" className="cursor-pointer">SMS</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="reminder-whatsapp"
+                      checked={reminderMethod === 'whatsapp' || reminderMethod === 'both'}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setReminderMethod(reminderMethod === 'sms' ? 'both' : 'whatsapp');
+                        } else {
+                          setReminderMethod(reminderMethod === 'both' ? 'sms' : 'whatsapp');
+                        }
+                      }}
+                    />
+                    <Label htmlFor="reminder-whatsapp" className="cursor-pointer">WhatsApp</Label>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reminderMessage">Mensagem de Lembrete</Label>
-                  <textarea
-                    id="reminderMessage"
-                    value={reminderMessage}
-                    onChange={(e) => setReminderMessage(e.target.value)}
-                    placeholder="Digite sua mensagem para reconquistar o cliente..."
-                    rows={4}
-                    className="w-full p-3 border border-input rounded-md resize-none"
-                  />
-                </div>
-                <Button
-                  onClick={handleSendReminders}
-                  disabled={selectedChurned.length === 0 || !reminderMessage}
-                  className="w-full"
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Enviar para {selectedChurned.length} Cliente(s) Selecionado(s)
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reminderMessage">Mensagem de Lembrete</Label>
+                <textarea
+                  id="reminderMessage"
+                  value={reminderMessage}
+                  onChange={(e) => setReminderMessage(e.target.value)}
+                  placeholder="Digite sua mensagem para reconquistar o cliente..."
+                  rows={6}
+                  className="w-full p-3 border border-input rounded-md resize-none"
+                />
+              </div>
+              <Button
+                onClick={handleSendReminders}
+                disabled={selectedChurned.length === 0 || !reminderMessage}
+                className="w-full"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Enviar para {selectedChurned.length} Cliente(s) Selecionado(s)
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>
