@@ -59,7 +59,7 @@ function AppSidebar() {
             {!isCollapsed && (
               <div>
                 <p className="font-semibold text-sm">Admin Panel</p>
-                <p className="text-xs text-muted-foreground">Beauty & Barber</p>
+                <p className="text-xs text-muted-foreground">datebook.com.br</p>
               </div>
             )}
           </div>
