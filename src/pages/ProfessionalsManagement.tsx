@@ -7,6 +7,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, User, Calendar, Clock, Ban } from "lucide-react";
+import { FileUpload } from "@/components/ui/file-upload";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +36,7 @@ interface Professional {
   startTime: string;
   endTime: string;
   isActive: boolean;
+  photoUrl?: string | null;
 }
 
 const weekDays = [
@@ -60,6 +63,7 @@ const ProfessionalsManagement = () => {
     startTime: "",
     endTime: "",
     isActive: true,
+    photoUrl: null,
   });
 
   useEffect(() => {
@@ -83,6 +87,7 @@ const ProfessionalsManagement = () => {
           startTime: "08:00",
           endTime: "18:00",
           isActive: true,
+          photoUrl: null,
         },
         {
           id: "2",
@@ -93,6 +98,7 @@ const ProfessionalsManagement = () => {
           startTime: "09:00",
           endTime: "19:00",
           isActive: true,
+          photoUrl: null,
         },
       ]);
     } catch (error) {
@@ -104,7 +110,7 @@ const ProfessionalsManagement = () => {
     }
   };
 
-  const handleInputChange = (field: keyof Omit<Professional, 'id'>, value: string | boolean) => {
+  const handleInputChange = (field: keyof Omit<Professional, 'id'>, value: string | boolean | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -178,6 +184,7 @@ const ProfessionalsManagement = () => {
       startTime: "",
       endTime: "",
       isActive: true,
+      photoUrl: null,
     });
     setEditingProfessional(null);
   };
@@ -192,6 +199,7 @@ const ProfessionalsManagement = () => {
       startTime: professional.startTime,
       endTime: professional.endTime,
       isActive: professional.isActive,
+      photoUrl: professional.photoUrl,
     });
     setIsDialogOpen(true);
   };
@@ -239,6 +247,30 @@ const ProfessionalsManagement = () => {
               </DialogHeader>
 
               <div className="space-y-6 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="photo">Foto do Profissional</Label>
+                  <FileUpload
+                    id="photo"
+                    label=""
+                    accept="image/*"
+                    value={formData.photoUrl}
+                    onChange={(file) => {
+                      if (file) {
+                        // TODO: Upload to server and get URL
+                        // For now, create a local URL for preview
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          handleInputChange("photoUrl", reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      } else {
+                        handleInputChange("photoUrl", null);
+                      }
+                    }}
+                    placeholder="Clique para adicionar uma foto"
+                  />
+                </div>
+
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nome Completo *</Label>
@@ -367,7 +399,15 @@ const ProfessionalsManagement = () => {
             <TableBody>
               {professionals.map((professional) => (
                 <TableRow key={professional.id}>
-                  <TableCell className="font-medium">{professional.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={professional.photoUrl || undefined} alt={professional.name} />
+                        <AvatarFallback>{professional.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span>{professional.name}</span>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="text-sm">
                       <div>{professional.email}</div>
