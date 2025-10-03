@@ -1,5 +1,5 @@
 // API configuration for ASP Classic backend communication
-const API_BASE_URL = "../admin/api";
+const API_BASE_URL = "/api";
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -14,9 +14,10 @@ export const apiCall = async <T = any>(
   method: 'GET' | 'POST' = 'GET'
 ): Promise<ApiResponse<T>> => {
   try {
+    const aspEndpoint = `admin_${endpoint}.asp`;
     const url = method === 'GET' && data 
-      ? `${API_BASE_URL}/${endpoint}?${new URLSearchParams(data).toString()}`
-      : `${API_BASE_URL}/${endpoint}`;
+      ? `${API_BASE_URL}/${aspEndpoint}?${new URLSearchParams(data).toString()}`
+      : `${API_BASE_URL}/${aspEndpoint}`;
 
     const options: RequestInit = {
       method,
