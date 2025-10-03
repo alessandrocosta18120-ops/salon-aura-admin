@@ -27,11 +27,10 @@ interface SalonData {
   facebook: string;
   youtube: string;
   tiktok: string;
-  latitude: string;
-  longitude: string;
   mainLogo: File | null;
   secondaryLogo: File | null;
   whatsappCustomText: string;
+  evadedClientsReminderText: string;
 }
 
 interface Holiday {
@@ -84,11 +83,10 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     facebook: "",
     youtube: "",
     tiktok: "",
-    latitude: "",
-    longitude: "",
     mainLogo: null,
     secondaryLogo: null,
     whatsappCustomText: "",
+    evadedClientsReminderText: "",
   });
 
   useEffect(() => {
@@ -310,6 +308,16 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                 value={salonData.whatsappCustomText}
                 onChange={(e) => handleInputChange("whatsappCustomText", e.target.value)}
                 placeholder="Texto que será enviado junto com os agendamentos via WhatsApp..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="evadedClientsReminderText">Texto para Lembrete à clientes evadidos</Label>
+              <Textarea
+                id="evadedClientsReminderText"
+                value={salonData.evadedClientsReminderText}
+                onChange={(e) => handleInputChange("evadedClientsReminderText", e.target.value)}
+                placeholder="Mensagem de lembrete para clientes que não retornam há algum tempo..."
                 rows={3}
               />
             </div>
@@ -656,38 +664,6 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                   value={salonData.tiktok}
                   onChange={(e) => handleInputChange("tiktok", e.target.value)}
                   placeholder="@seusalao"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Location */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Localização GPS</CardTitle>
-            <CardDescription>
-              Coordenadas para integração com mapas
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="latitude">Latitude</Label>
-                <Input
-                  id="latitude"
-                  value={salonData.latitude}
-                  onChange={(e) => handleInputChange("latitude", e.target.value)}
-                  placeholder="-23.5505"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="longitude">Longitude</Label>
-                <Input
-                  id="longitude"
-                  value={salonData.longitude}
-                  onChange={(e) => handleInputChange("longitude", e.target.value)}
-                  placeholder="-46.6333"
                 />
               </div>
             </div>

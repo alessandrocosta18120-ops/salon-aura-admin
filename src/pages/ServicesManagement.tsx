@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Scissors, Clock, DollarSign } from "lucide-react";
 import {
@@ -38,8 +39,8 @@ interface Service {
   description: string;
   duration: number;
   price: number;
-  professionalId: string;
-  professionalName: string;
+  professionalIds: string[];
+  professionalNames: string[];
   isActive: boolean;
 }
 
@@ -55,12 +56,12 @@ const ServicesManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<Omit<Service, 'id' | 'professionalName'>>({
+  const [formData, setFormData] = useState<Omit<Service, 'id' | 'professionalNames'>>({
     name: "",
     description: "",
     duration: 60,
     price: 0,
-    professionalId: "",
+    professionalIds: [],
     isActive: true,
   });
 
@@ -83,8 +84,8 @@ const ServicesManagement = () => {
           description: "Corte de cabelo feminino com lavagem e finalização",
           duration: 90,
           price: 80,
-          professionalId: "1",
-          professionalName: "Ana Silva",
+          professionalIds: ["1"],
+          professionalNames: ["Ana Silva"],
           isActive: true,
         },
         {
@@ -93,8 +94,8 @@ const ServicesManagement = () => {
           description: "Aparar barba e bigode com navalha",
           duration: 45,
           price: 35,
-          professionalId: "2",
-          professionalName: "Carlos Santos",
+          professionalIds: ["2"],
+          professionalNames: ["Carlos Santos"],
           isActive: true,
         },
         {
@@ -103,8 +104,8 @@ const ServicesManagement = () => {
           description: "Tratamento para alisamento dos cabelos",
           duration: 180,
           price: 150,
-          professionalId: "1",
-          professionalName: "Ana Silva",
+          professionalIds: ["1", "2"],
+          professionalNames: ["Ana Silva", "Carlos Santos"],
           isActive: true,
         },
       ]);
@@ -133,8 +134,17 @@ const ServicesManagement = () => {
     }
   };
 
-  const handleInputChange = (field: keyof Omit<Service, 'id' | 'professionalName'>, value: string | number | boolean) => {
+  const handleInputChange = (field: keyof Omit<Service, 'id' | 'professionalNames'>, value: string | number | boolean | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleProfessionalToggle = (professionalId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      professionalIds: prev.professionalIds.includes(professionalId)
+        ? prev.professionalIds.filter(id => id !== professionalId)
+        : [...prev.professionalIds, professionalId]
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -152,13 +162,15 @@ const ServicesManagement = () => {
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const professionalName = professionals.find(p => p.id === formData.professionalId)?.name || "";
+      const professionalNames = formData.professionalIds
+        .map(id => professionals.find(p => p.id === id)?.name)
+        .filter(Boolean) as string[];
 
       if (editingService) {
         setServices(prev =>
           prev.map(s =>
             s.id === editingService.id
-              ? { ...formData, id: editingService.id, professionalName }
+              ? { ...formData, id: editingService.id, professionalNames }
               : s
           )
         );
@@ -170,7 +182,7 @@ const ServicesManagement = () => {
         const newService = {
           ...formData,
           id: Date.now().toString(),
-          professionalName,
+          professionalNames,
         };
         setServices(prev => [...prev, newService]);
         toast({
@@ -198,7 +210,7 @@ const ServicesManagement = () => {
       description: "",
       duration: 60,
       price: 0,
-      professionalId: "",
+      professionalIds: [],
       isActive: true,
     });
     setEditingService(null);
@@ -211,7 +223,7 @@ const ServicesManagement = () => {
       description: service.description,
       duration: service.duration,
       price: service.price,
-      professionalId: service.professionalId,
+      professionalIds: service.professionalIds,
       isActive: service.isActive,
     });
     setIsDialogOpen(true);
@@ -320,24 +332,22 @@ const ServicesManagement = () => {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="professionalId">Profissional *</Label>
-                    <Select
-                      value={formData.professionalId}
-                      onValueChange={(value) => handleInputChange("professionalId", value)}
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {professionals.map((professional) => (
-                          <SelectItem key={professional.id} value={professional.id}>
+                  <div className="space-y-2 md:col-span-3">
+                    <Label>Profissionais *</Label>
+                    <div className="grid grid-cols-2 gap-3 mt-2 p-4 border rounded-md">
+                      {professionals.map((professional) => (
+                        <div key={professional.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`prof-${professional.id}`}
+                            checked={formData.professionalIds.includes(professional.id)}
+                            onCheckedChange={() => handleProfessionalToggle(professional.id)}
+                          />
+                          <Label htmlFor={`prof-${professional.id}`} className="text-sm font-normal cursor-pointer">
                             {professional.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -374,7 +384,7 @@ const ServicesManagement = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Serviço</TableHead>
-                <TableHead>Profissional</TableHead>
+                <TableHead>Profissionais</TableHead>
                 <TableHead>Duração</TableHead>
                 <TableHead>Preço</TableHead>
                 <TableHead>Status</TableHead>
@@ -394,7 +404,15 @@ const ServicesManagement = () => {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{service.professionalName}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {service.professionalNames.map((name, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4 text-muted-foreground" />

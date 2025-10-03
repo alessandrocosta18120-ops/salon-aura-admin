@@ -42,7 +42,7 @@ function AppSidebar() {
   const getNavClasses = ({ isActive }: { isActive: boolean }) =>
     isActive
       ? "bg-primary text-primary-foreground font-medium"
-      : "text-sidebar-foreground hover:bg-muted/50 hover:text-sidebar-foreground";
+      : "text-foreground hover:bg-muted/50";
 
   const handleLogout = () => {
     navigate("/login");
