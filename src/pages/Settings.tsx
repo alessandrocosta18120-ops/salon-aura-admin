@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Settings as SettingsIcon, Bell, Shield, MessageSquare, Calendar } from "lucide-react";
+import { settingsApi } from "@/lib/api";
 import {
   Select,
   SelectContent,
@@ -72,10 +73,15 @@ const Settings = () => {
 
   const loadSettings = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("../admin/api/getadmsettings");
-      // const data = await response.json();
-      // setSettings(data);
+      const response = await settingsApi.get();
+      if (response.success && response.data) {
+        setSettings(response.data);
+      }
+      
+      const confirmResponse = await settingsApi.getConfirmation();
+      if (confirmResponse.success && confirmResponse.data) {
+        setConfirmationSettings(confirmResponse.data);
+      }
     } catch (error) {
       toast({
         title: "Erro ao carregar configurações",
@@ -94,23 +100,20 @@ const Settings = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("../admin/api/setadmsettings", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(settings)
-      // });
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast({
-        title: "Configurações salvas!",
-        description: "As configurações foram atualizadas com sucesso.",
-      });
+      const response = await settingsApi.set(settings);
+      
+      if (response.success) {
+        toast({
+          title: "Configurações salvas!",
+          description: "As configurações foram atualizadas com sucesso.",
+        });
+      } else {
+        throw new Error(response.error || "Erro ao salvar configurações");
+      }
     } catch (error) {
       toast({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar as configurações.",
+        description: error instanceof Error ? error.message : "Não foi possível salvar as configurações.",
         variant: "destructive",
       });
     } finally {
@@ -123,23 +126,20 @@ const Settings = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("../admin/api/setconfirmationsettings", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(confirmationSettings)
-      // });
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast({
-        title: "Configurações de confirmação salvas!",
-        description: "As configurações de confirmação foram atualizadas.",
-      });
+      const response = await settingsApi.setConfirmation(confirmationSettings);
+      
+      if (response.success) {
+        toast({
+          title: "Configurações de confirmação salvas!",
+          description: "As configurações de confirmação foram atualizadas.",
+        });
+      } else {
+        throw new Error(response.error || "Erro ao salvar configurações de confirmação");
+      }
     } catch (error) {
       toast({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar as configurações de confirmação.",
+        description: error instanceof Error ? error.message : "Não foi possível salvar as configurações de confirmação.",
         variant: "destructive",
       });
     } finally {

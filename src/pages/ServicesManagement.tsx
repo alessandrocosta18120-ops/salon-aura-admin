@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Scissors, Clock, DollarSign } from "lucide-react";
+import { serviceApi, professionalApi } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -72,47 +73,16 @@ const ServicesManagement = () => {
 
   const loadServices = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("../admin/api/getadmservices");
-      // const data = await response.json();
-
-      // Mock data for demonstration
-      setServices([
-        {
-          id: "1",
-          name: "Corte Feminino",
-          description: "Corte de cabelo feminino com lavagem e finalização",
-          duration: 90,
-          price: 80,
-          professionalIds: ["1"],
-          professionalNames: ["Ana Silva"],
-          isActive: true,
-        },
-        {
-          id: "2",
-          name: "Barba e Bigode",
-          description: "Aparar barba e bigode com navalha",
-          duration: 45,
-          price: 35,
-          professionalIds: ["2"],
-          professionalNames: ["Carlos Santos"],
-          isActive: true,
-        },
-        {
-          id: "3",
-          name: "Escova Progressiva",
-          description: "Tratamento para alisamento dos cabelos",
-          duration: 180,
-          price: 150,
-          professionalIds: ["1", "2"],
-          professionalNames: ["Ana Silva", "Carlos Santos"],
-          isActive: true,
-        },
-      ]);
+      const response = await serviceApi.get();
+      if (response.success && response.data) {
+        setServices(response.data);
+      } else {
+        throw new Error(response.error || "Erro ao carregar serviços");
+      }
     } catch (error) {
       toast({
         title: "Erro ao carregar serviços",
-        description: "Não foi possível carregar a lista de serviços.",
+        description: error instanceof Error ? error.message : "Não foi possível carregar a lista de serviços.",
         variant: "destructive",
       });
     }
@@ -120,15 +90,10 @@ const ServicesManagement = () => {
 
   const loadProfessionals = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("../admin/api/getadmprofessionals");
-      // const data = await response.json();
-
-      // Mock data for demonstration
-      setProfessionals([
-        { id: "1", name: "Ana Silva" },
-        { id: "2", name: "Carlos Santos" },
-      ]);
+      const response = await professionalApi.get();
+      if (response.success && response.data) {
+        setProfessionals(response.data.map((p: any) => ({ id: p.id, name: p.name })));
+      }
     } catch (error) {
       console.error("Erro ao carregar profissionais:", error);
     }
@@ -152,51 +117,31 @@ const ServicesManagement = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const endpoint = editingService ? "updateadmservice" : "setadmservice";
-      // const response = await fetch(`../admin/api/${endpoint}`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(formData)
-      // });
+      const dataToSend = editingService 
+        ? { ...formData, id: editingService.id }
+        : formData;
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const professionalNames = formData.professionalIds
-        .map(id => professionals.find(p => p.id === id)?.name)
-        .filter(Boolean) as string[];
-
-      if (editingService) {
-        setServices(prev =>
-          prev.map(s =>
-            s.id === editingService.id
-              ? { ...formData, id: editingService.id, professionalNames }
-              : s
-          )
-        );
+      const response = await serviceApi.set(dataToSend);
+      
+      if (response.success) {
+        await loadServices();
+        
         toast({
-          title: "Serviço atualizado!",
-          description: "As informações foram atualizadas com sucesso.",
+          title: editingService ? "Serviço atualizado!" : "Serviço cadastrado!",
+          description: editingService 
+            ? "As informações foram atualizadas com sucesso."
+            : "O serviço foi adicionado com sucesso.",
         });
+
+        setIsDialogOpen(false);
+        resetForm();
       } else {
-        const newService = {
-          ...formData,
-          id: Date.now().toString(),
-          professionalNames,
-        };
-        setServices(prev => [...prev, newService]);
-        toast({
-          title: "Serviço cadastrado!",
-          description: "O serviço foi adicionado com sucesso.",
-        });
+        throw new Error(response.error || "Erro ao salvar serviço");
       }
-
-      setIsDialogOpen(false);
-      resetForm();
     } catch (error) {
       toast({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar o serviço.",
+        description: error instanceof Error ? error.message : "Não foi possível salvar o serviço.",
         variant: "destructive",
       });
     } finally {

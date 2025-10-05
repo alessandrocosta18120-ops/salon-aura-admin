@@ -1,38 +1,99 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Store, Users, Scissors, Settings, TrendingUp, UserPlus, Calendar } from "lucide-react";
 import ClientsManagement from "@/components/ClientsManagement";
 import AppointmentDetails from "@/components/AppointmentDetails";
+import { appointmentApi, professionalApi, serviceApi, clientApi } from "@/lib/api";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<'dashboard' | 'clients' | 'appointments'>('dashboard');
-
-  const stats = [
+  const [stats, setStats] = useState([
     {
       title: "Profissionais Ativos",
-      value: "12",
-      description: "3 novos este mês",
+      value: "0",
+      description: "Carregando...",
       icon: Users,
       color: "text-primary",
     },
     {
       title: "Serviços Cadastrados",
-      value: "28",
-      description: "5 atualizados",
+      value: "0",
+      description: "Carregando...",
       icon: Scissors,
       color: "text-success",
     },
     {
       title: "Agendamentos Hoje",
-      value: "45",
-      description: "87% ocupação",
+      value: "0",
+      description: "Carregando...",
       icon: TrendingUp,
       color: "text-warning",
     },
-  ];
+  ]);
+  const [clientsCount, setClientsCount] = useState(0);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      // Load professionals count
+      const profResponse = await professionalApi.get();
+      const professionalsCount = profResponse.success && profResponse.data 
+        ? profResponse.data.filter((p: any) => p.isActive).length 
+        : 0;
+
+      // Load services count
+      const servResponse = await serviceApi.get();
+      const servicesCount = servResponse.success && servResponse.data 
+        ? servResponse.data.filter((s: any) => s.isActive).length 
+        : 0;
+
+      // Load today's appointments
+      const apptResponse = await appointmentApi.getToday();
+      const appointmentsToday = apptResponse.success && apptResponse.data 
+        ? apptResponse.data.length 
+        : 0;
+
+      // Load clients count
+      const clientResponse = await clientApi.get();
+      const totalClients = clientResponse.success && clientResponse.data 
+        ? clientResponse.data.length 
+        : 0;
+
+      setStats([
+        {
+          title: "Profissionais Ativos",
+          value: professionalsCount.toString(),
+          description: "Cadastrados no sistema",
+          icon: Users,
+          color: "text-primary",
+        },
+        {
+          title: "Serviços Cadastrados",
+          value: servicesCount.toString(),
+          description: "Disponíveis para agendamento",
+          icon: Scissors,
+          color: "text-success",
+        },
+        {
+          title: "Agendamentos Hoje",
+          value: appointmentsToday.toString(),
+          description: "Confirmados para hoje",
+          icon: TrendingUp,
+          color: "text-warning",
+        },
+      ]);
+
+      setClientsCount(totalClients);
+    } catch (error) {
+      console.error("Erro ao carregar dados do dashboard:", error);
+    }
+  };
 
   const quickActions = [
     {
@@ -136,7 +197,7 @@ const Dashboard = () => {
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-2xl font-bold">248</p>
+              <p className="text-2xl font-bold">{clientsCount}</p>
               <p className="text-sm text-muted-foreground">Total de clientes</p>
             </div>
             <Button 

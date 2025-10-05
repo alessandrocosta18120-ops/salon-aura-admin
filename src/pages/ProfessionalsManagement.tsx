@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, User, Calendar, Clock, Ban } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { professionalApi } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -72,39 +73,16 @@ const ProfessionalsManagement = () => {
 
   const loadProfessionals = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("../admin/api/getadmprofessionals");
-      // const data = await response.json();
-
-      // Mock data for demonstration
-      setProfessionals([
-        {
-          id: "1",
-          name: "Ana Silva",
-          email: "ana@salon.com",
-          phone: "(11) 99999-1111",
-          workingDays: ["1", "2", "3", "4", "5"],
-          startTime: "08:00",
-          endTime: "18:00",
-          isActive: true,
-          photoUrl: null,
-        },
-        {
-          id: "2",
-          name: "Carlos Santos",
-          email: "carlos@salon.com",
-          phone: "(11) 99999-2222",
-          workingDays: ["2", "3", "4", "5", "6"],
-          startTime: "09:00",
-          endTime: "19:00",
-          isActive: true,
-          photoUrl: null,
-        },
-      ]);
+      const response = await professionalApi.get();
+      if (response.success && response.data) {
+        setProfessionals(response.data);
+      } else {
+        throw new Error(response.error || "Erro ao carregar profissionais");
+      }
     } catch (error) {
       toast({
         title: "Erro ao carregar profissionais",
-        description: "Não foi possível carregar a lista de profissionais.",
+        description: error instanceof Error ? error.message : "Não foi possível carregar a lista de profissionais.",
         variant: "destructive",
       });
     }
@@ -128,46 +106,31 @@ const ProfessionalsManagement = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const endpoint = editingProfessional ? "updateadmprofessional" : "setadmprofessional";
-      // const response = await fetch(`../admin/api/${endpoint}`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(formData)
-      // });
+      const dataToSend = editingProfessional 
+        ? { ...formData, id: editingProfessional.id }
+        : formData;
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      if (editingProfessional) {
-        setProfessionals(prev =>
-          prev.map(p =>
-            p.id === editingProfessional.id
-              ? { ...formData, id: editingProfessional.id }
-              : p
-          )
-        );
+      const response = await professionalApi.set(dataToSend);
+      
+      if (response.success) {
+        await loadProfessionals();
+        
         toast({
-          title: "Profissional atualizado!",
-          description: "As informações foram atualizadas com sucesso.",
+          title: editingProfessional ? "Profissional atualizado!" : "Profissional cadastrado!",
+          description: editingProfessional 
+            ? "As informações foram atualizadas com sucesso."
+            : "O profissional foi adicionado com sucesso.",
         });
+
+        setIsDialogOpen(false);
+        resetForm();
       } else {
-        const newProfessional = {
-          ...formData,
-          id: Date.now().toString(),
-        };
-        setProfessionals(prev => [...prev, newProfessional]);
-        toast({
-          title: "Profissional cadastrado!",
-          description: "O profissional foi adicionado com sucesso.",
-        });
+        throw new Error(response.error || "Erro ao salvar profissional");
       }
-
-      setIsDialogOpen(false);
-      resetForm();
     } catch (error) {
       toast({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar o profissional.",
+        description: error instanceof Error ? error.message : "Não foi possível salvar o profissional.",
         variant: "destructive",
       });
     } finally {
