@@ -20,29 +20,33 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call to ../admin/api/login
-      // const response = await fetch("../admin/api/login", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ username, password })
-      // });
+      const response = await fetch("/api/admin_authlogin.asp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
 
-      // Simulated login for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await response.json();
       
-      if (username && password) {
+      if (result.success) {
         toast({
           title: "Login realizado com sucesso!",
           description: "Redirecionando para o painel...",
         });
+        
+        // Armazena sessão se necessário
+        if (result.data?.sessionId) {
+          sessionStorage.setItem('sessionId', result.data.sessionId);
+        }
+        
         navigate("/dashboard");
       } else {
-        throw new Error("Credenciais inválidas");
+        throw new Error(result.error || "Credenciais inválidas");
       }
     } catch (error) {
       toast({
         title: "Erro no login",
-        description: "Usuário ou senha inválidos.",
+        description: error instanceof Error ? error.message : "Usuário ou senha inválidos.",
         variant: "destructive",
       });
     } finally {
