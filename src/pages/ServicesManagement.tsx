@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Scissors, Clock, DollarSign } from "lucide-react";
 import { serviceApi, professionalApi } from "@/lib/api";
+import { serviceSchema, getValidationErrorMessage } from "@/lib/validation";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -117,9 +119,22 @@ const ServicesManagement = () => {
     setIsLoading(true);
 
     try {
+      // VALIDAÇÃO DE SEGURANÇA: Validar dados com Zod antes de enviar
+      const validationResult = serviceSchema.safeParse(formData);
+      
+      if (!validationResult.success) {
+        toast({
+          title: "Dados inválidos",
+          description: getValidationErrorMessage(validationResult.error),
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const dataToSend = editingService 
-        ? { ...formData, id: editingService.id }
-        : formData;
+        ? { ...validationResult.data, id: editingService.id }
+        : validationResult.data;
 
       const response = await serviceApi.set(dataToSend);
       
