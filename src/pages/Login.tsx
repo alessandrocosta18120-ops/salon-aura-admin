@@ -34,9 +34,14 @@ const Login = () => {
           description: "Redirecionando para o painel...",
         });
         
-        // Armazena sessão se necessário
-        if (result.data?.sessionId) {
-          sessionStorage.setItem('sessionId', result.data.sessionId);
+        // Armazena sessão completa com salonId
+        if (result.data?.sessionId && result.data?.salonId) {
+          const sessionData = {
+            sessionId: result.data.sessionId,
+            salonId: result.data.salonId,
+            userName: result.data.userName || username
+          };
+          sessionStorage.setItem('salon_admin_session', JSON.stringify(sessionData));
         }
         
         navigate("/dashboard");

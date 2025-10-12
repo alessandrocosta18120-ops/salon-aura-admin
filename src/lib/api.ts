@@ -1,4 +1,6 @@
 // API configuration for ASP Classic backend communication
+import { sessionManager } from './session';
+
 const API_BASE_URL = "/api";
 
 export interface ApiResponse<T = any> {
@@ -7,16 +9,27 @@ export interface ApiResponse<T = any> {
   error?: string;
 }
 
-// Helper function to make API calls
+// Helper function to make API calls with automatic salonId injection
 export const apiCall = async <T = any>(
   endpoint: string,
   data?: any,
-  method: 'GET' | 'POST' = 'GET'
+  method: 'GET' | 'POST' = 'GET',
+  includeSalonId: boolean = true
 ): Promise<ApiResponse<T>> => {
   try {
     const aspEndpoint = `admin_${endpoint}.asp`;
-    const url = method === 'GET' && data 
-      ? `${API_BASE_URL}/${aspEndpoint}?${new URLSearchParams(data).toString()}`
+    
+    // Inject salonId automatically from session
+    let finalData = data || {};
+    if (includeSalonId) {
+      const salonId = sessionManager.getSalonId();
+      if (salonId) {
+        finalData = { ...finalData, salonId };
+      }
+    }
+
+    const url = method === 'GET' && Object.keys(finalData).length > 0
+      ? `${API_BASE_URL}/${aspEndpoint}?${new URLSearchParams(finalData).toString()}`
       : `${API_BASE_URL}/${aspEndpoint}`;
 
     const options: RequestInit = {
@@ -26,8 +39,8 @@ export const apiCall = async <T = any>(
       },
     };
 
-    if (method === 'POST' && data) {
-      options.body = JSON.stringify(data);
+    if (method === 'POST' && Object.keys(finalData).length > 0) {
+      options.body = JSON.stringify(finalData);
     }
 
     const response = await fetch(url, options);
@@ -98,12 +111,12 @@ export const settingsApi = {
   setConfirmation: (data: any) => apiCall('setadmconfirmation', data, 'POST'),
 };
 
-// Authentication APIs
+// Authentication APIs (no salonId needed)
 export const authApi = {
-  login: (credentials: any) => apiCall('authlogin', credentials, 'POST'),
-  forgotPassword: (data: any) => apiCall('authforgotpassword', data, 'POST'),
-  verify2FA: (data: any) => apiCall('authverify2fa', data, 'POST'),
-  logout: () => apiCall('authlogout', {}, 'POST'),
+  login: (credentials: any) => apiCall('authlogin', credentials, 'POST', false),
+  forgotPassword: (data: any) => apiCall('authforgotpassword', data, 'POST', false),
+  verify2FA: (data: any) => apiCall('authverify2fa', data, 'POST', false),
+  logout: () => apiCall('authlogout', {}, 'POST', false),
 };
 
 // Holiday APIs
