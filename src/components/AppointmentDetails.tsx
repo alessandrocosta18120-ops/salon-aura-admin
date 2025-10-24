@@ -206,9 +206,9 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
           </Card>
         ) : sortedTimes.length === 0 ? (
           <Card>
-            <CardContent className="py-8">
-              <p className="text-center text-muted-foreground">
-                Nenhum agendamento para esta data
+            <CardContent className="py-12">
+              <p className="text-center text-muted-foreground text-lg">
+                Não há agendamentos para esta data
               </p>
             </CardContent>
           </Card>

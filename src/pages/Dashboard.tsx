@@ -9,7 +9,7 @@ import { appointmentApi, professionalApi, serviceApi, clientApi } from "@/lib/ap
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [currentView, setCurrentView] = useState<'dashboard' | 'clients' | 'appointments'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'appointments'>('dashboard');
   const [stats, setStats] = useState([
     {
       title: "Profissionais Ativos",
@@ -118,10 +118,10 @@ const Dashboard = () => {
       color: "from-secondary to-secondary-hover",
     },
     {
-      title: "Clientes Fixos",
+      title: "Administrar Clientes",
       description: "Cadastre clientes com agendamentos automáticos",
       icon: UserPlus,
-      action: () => setCurrentView('clients'),
+      action: () => navigate("/dashboard/clients"),
       color: "from-warning to-warning",
     },
     {
@@ -132,10 +132,6 @@ const Dashboard = () => {
       color: "from-muted-foreground to-muted-foreground",
     },
   ];
-
-  if (currentView === 'clients') {
-    return <ClientsManagement onBack={() => setCurrentView('dashboard')} />;
-  }
 
   if (currentView === 'appointments') {
     return <AppointmentDetails onBack={() => setCurrentView('dashboard')} />;
@@ -202,7 +198,7 @@ const Dashboard = () => {
             </div>
             <Button 
               variant="outline" 
-              onClick={() => setCurrentView('clients')}
+              onClick={() => navigate("/dashboard/clients")}
               className="flex items-center gap-2"
             >
               <Calendar className="h-4 w-4" />

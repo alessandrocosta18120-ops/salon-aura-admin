@@ -7,8 +7,11 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import SalonManagement from "./pages/SalonManagement";
 import ProfessionalsManagement from "./pages/ProfessionalsManagement";
+import ProfessionalForm from "./pages/ProfessionalForm";
 import ServicesManagement from "./pages/ServicesManagement";
+import ServiceForm from "./pages/ServiceForm";
 import Settings from "./pages/Settings";
+import ClientsManagement from "./components/ClientsManagement";
 import DashboardLayout from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -26,7 +29,12 @@ const App = () => (
             <Route index element={<Dashboard />} />
             <Route path="salon" element={<SalonManagement />} />
             <Route path="professionals" element={<ProfessionalsManagement />} />
+            <Route path="professionals/new" element={<ProfessionalForm />} />
+            <Route path="professionals/edit/:id" element={<ProfessionalForm />} />
             <Route path="services" element={<ServicesManagement />} />
+            <Route path="services/new" element={<ServiceForm />} />
+            <Route path="services/edit/:id" element={<ServiceForm />} />
+            <Route path="clients" element={<ClientsManagement onBack={() => window.history.back()} />} />
             <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="/" element={<Login />} />

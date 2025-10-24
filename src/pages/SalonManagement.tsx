@@ -26,7 +26,6 @@ interface SalonData {
   instagram: string;
   facebook: string;
   youtube: string;
-  tiktok: string;
   mainLogo: File | null;
   secondaryLogo: File | null;
   whatsappCustomText: string;
@@ -82,7 +81,6 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     instagram: "",
     facebook: "",
     youtube: "",
-    tiktok: "",
     mainLogo: null,
     secondaryLogo: null,
     whatsappCustomText: "",
@@ -656,15 +654,6 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                     className="pl-10"
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tiktok">TikTok</Label>
-                <Input
-                  id="tiktok"
-                  value={salonData.tiktok}
-                  onChange={(e) => handleInputChange("tiktok", e.target.value)}
-                  placeholder="@seusalao"
-                />
               </div>
             </div>
           </CardContent>

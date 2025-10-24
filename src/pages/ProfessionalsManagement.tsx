@@ -1,24 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, User, Calendar, Clock, Ban } from "lucide-react";
-import { FileUpload } from "@/components/ui/file-upload";
+import { Plus, User, Calendar, Clock, Ban, Edit } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { professionalApi } from "@/lib/api";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -51,21 +39,9 @@ const weekDays = [
 ];
 
 const ProfessionalsManagement = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<Omit<Professional, 'id'>>({
-    name: "",
-    email: "",
-    phone: "",
-    workingDays: [],
-    startTime: "",
-    endTime: "",
-    isActive: true,
-    photoUrl: null,
-  });
 
   useEffect(() => {
     loadProfessionals();
@@ -88,84 +64,6 @@ const ProfessionalsManagement = () => {
     }
   };
 
-  const handleInputChange = (field: keyof Omit<Professional, 'id'>, value: string | boolean | null) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleWorkingDayChange = (dayId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      workingDays: checked
-        ? [...prev.workingDays, dayId]
-        : prev.workingDays.filter(id => id !== dayId)
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const dataToSend = editingProfessional 
-        ? { ...formData, id: editingProfessional.id }
-        : formData;
-
-      const response = await professionalApi.set(dataToSend);
-      
-      if (response.success) {
-        await loadProfessionals();
-        
-        toast({
-          title: editingProfessional ? "Profissional atualizado!" : "Profissional cadastrado!",
-          description: editingProfessional 
-            ? "As informações foram atualizadas com sucesso."
-            : "O profissional foi adicionado com sucesso.",
-        });
-
-        setIsDialogOpen(false);
-        resetForm();
-      } else {
-        throw new Error(response.error || "Erro ao salvar profissional");
-      }
-    } catch (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: error instanceof Error ? error.message : "Não foi possível salvar o profissional.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      workingDays: [],
-      startTime: "",
-      endTime: "",
-      isActive: true,
-      photoUrl: null,
-    });
-    setEditingProfessional(null);
-  };
-
-  const handleEdit = (professional: Professional) => {
-    setEditingProfessional(professional);
-    setFormData({
-      name: professional.name,
-      email: professional.email,
-      phone: professional.phone,
-      workingDays: professional.workingDays,
-      startTime: professional.startTime,
-      endTime: professional.endTime,
-      isActive: professional.isActive,
-      photoUrl: professional.photoUrl,
-    });
-    setIsDialogOpen(true);
-  };
 
   const getWorkingDaysDisplay = (workingDays: string[]) => {
     return workingDays
@@ -183,158 +81,13 @@ const ProfessionalsManagement = () => {
             Gerencie os profissionais do seu salão
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                resetForm();
-                setIsDialogOpen(true);
-              }}
-              className="bg-gradient-to-r from-primary to-primary-hover"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Profissional
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <form onSubmit={handleSubmit}>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingProfessional ? "Editar Profissional" : "Novo Profissional"}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingProfessional
-                    ? "Atualize as informações do profissional"
-                    : "Cadastre um novo profissional no sistema"}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-6 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="photo">Foto do Profissional</Label>
-                  <FileUpload
-                    id="photo"
-                    label=""
-                    accept="image/*"
-                    value={formData.photoUrl}
-                    onChange={(file) => {
-                      if (file) {
-                        // TODO: Upload to server and get URL
-                        // For now, create a local URL for preview
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          handleInputChange("photoUrl", reader.result as string);
-                        };
-                        reader.readAsDataURL(file);
-                      } else {
-                        handleInputChange("photoUrl", null);
-                      }
-                    }}
-                    placeholder="Clique para adicionar uma foto"
-                  />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome Completo *</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange("name", e.target.value)}
-                      placeholder="Nome do profissional"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      placeholder="email@exemplo.com"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefone</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="(11) 99999-9999"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <Label>Dias de Trabalho</Label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {weekDays.map((day) => (
-                      <div key={day.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`work-${day.id}`}
-                          checked={formData.workingDays.includes(day.id)}
-                          onCheckedChange={(checked) =>
-                            handleWorkingDayChange(day.id, checked as boolean)
-                          }
-                        />
-                        <Label htmlFor={`work-${day.id}`} className="text-sm">
-                          {day.label}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="startTime">Horário de Início</Label>
-                    <Input
-                      id="startTime"
-                      type="time"
-                      value={formData.startTime}
-                      onChange={(e) => handleInputChange("startTime", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="endTime">Horário de Fim</Label>
-                    <Input
-                      id="endTime"
-                      type="time"
-                      value={formData.endTime}
-                      onChange={(e) => handleInputChange("endTime", e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) =>
-                      handleInputChange("isActive", checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="isActive">Profissional ativo</Label>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Salvando..." : editingProfessional ? "Atualizar" : "Cadastrar"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button
+          onClick={() => navigate("/dashboard/professionals/new")}
+          className="bg-gradient-to-r from-primary to-primary-hover"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Adicionar Profissional
+        </Button>
       </div>
 
       <Card>
@@ -393,13 +146,14 @@ const ProfessionalsManagement = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(professional)}
-                    >
-                      Editar
-                    </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/dashboard/professionals/edit/${professional.id}`)}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Editar
+                  </Button>
                   </TableCell>
                 </TableRow>
               ))}

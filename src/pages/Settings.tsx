@@ -38,7 +38,6 @@ interface SettingsData {
   
   // Outros
   timeZone: string;
-  dateFormat: string;
 }
 
 const Settings = () => {
@@ -57,7 +56,6 @@ const Settings = () => {
     sessionTimeout: 60,
     maxLoginAttempts: 3,
     timeZone: "America/Sao_Paulo",
-    dateFormat: "dd/MM/yyyy",
   });
 
   const [confirmationSettings, setConfirmationSettings] = useState({
@@ -372,40 +370,21 @@ const Settings = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="timeZone">Fuso Horário</Label>
-                <Select
-                  value={settings.timeZone}
-                  onValueChange={(value) => handleInputChange("timeZone", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="America/Sao_Paulo">São Paulo (GMT-3)</SelectItem>
-                    <SelectItem value="America/New_York">Nova York (GMT-5)</SelectItem>
-                    <SelectItem value="Europe/London">Londres (GMT+0)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dateFormat">Formato de Data</Label>
-                <Select
-                  value={settings.dateFormat}
-                  onValueChange={(value) => handleInputChange("dateFormat", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dd/MM/yyyy">DD/MM/AAAA</SelectItem>
-                    <SelectItem value="MM/dd/yyyy">MM/DD/AAAA</SelectItem>
-                    <SelectItem value="yyyy-MM-dd">AAAA-MM-DD</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="timeZone">Fuso Horário</Label>
+              <Select
+                value={settings.timeZone}
+                onValueChange={(value) => handleInputChange("timeZone", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="America/Sao_Paulo">São Paulo (GMT-3)</SelectItem>
+                  <SelectItem value="America/New_York">Nova York (GMT-5)</SelectItem>
+                  <SelectItem value="Europe/London">Londres (GMT+0)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>

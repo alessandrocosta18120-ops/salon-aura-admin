@@ -1,4 +1,5 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -19,15 +20,19 @@ import {
   Scissors,
   Settings,
   LogOut,
-  Menu,
+  CalendarDays,
   Store,
+  UserCog,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { salonApi } from "@/lib/api";
 
 const menuItems = [
-  { title: "Informações do Salão", url: "/dashboard/salon", icon: Store },
-  { title: "Profissionais", url: "/dashboard/professionals", icon: Users },
-  { title: "Serviços", url: "/dashboard/services", icon: Scissors },
+  { title: "Agendamento Hoje", url: "/dashboard", icon: CalendarDays },
+  { title: "Configurar Salão", url: "/dashboard/salon", icon: Store },
+  { title: "Gerenciar Profissionais", url: "/dashboard/professionals", icon: Users },
+  { title: "Cadastrar Serviços", url: "/dashboard/services", icon: Scissors },
+  { title: "Administrar Clientes", url: "/dashboard/clients", icon: UserCog },
   { title: "Configurações", url: "/dashboard/settings", icon: Settings },
 ];
 
@@ -58,7 +63,7 @@ function AppSidebar() {
             </div>
             {!isCollapsed && (
               <div>
-                <p className="font-semibold text-sm">Admin Panel</p>
+                <p className="font-semibold text-sm">Painel Administrativo</p>
                 <p className="text-xs text-muted-foreground">datebook.com.br</p>
               </div>
             )}
@@ -99,14 +104,35 @@ function AppSidebar() {
 }
 
 const DashboardLayout = () => {
+  const [salonName, setSalonName] = useState<string>("");
+
+  useEffect(() => {
+    const loadSalonName = async () => {
+      try {
+        const response = await salonApi.get();
+        if (response.success && response.data) {
+          setSalonName(response.data.name || "");
+        }
+      } catch (error) {
+        console.error("Erro ao carregar nome do salão:", error);
+      }
+    };
+    loadSalonName();
+  }, []);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center px-4">
-            <SidebarTrigger className="mr-4" />
-            <h1 className="font-semibold">Painel Administrativo</h1>
+          <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-4">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
+              <h1 className="font-semibold">Painel Administrativo</h1>
+            </div>
+            {salonName && (
+              <div className="font-medium text-sm">{salonName}</div>
+            )}
           </header>
           <main className="flex-1 p-6 bg-muted/30">
             <Outlet />
