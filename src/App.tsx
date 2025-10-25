@@ -14,6 +14,8 @@ import Settings from "./pages/Settings";
 import ClientsManagement from "./components/ClientsManagement";
 import DashboardLayout from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
+import TimeBlocks from "./pages/TimeBlocks";
+import FinancialSettings from "./pages/FinancialSettings";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +37,8 @@ const App = () => (
             <Route path="services/new" element={<ServiceForm />} />
             <Route path="services/edit/:id" element={<ServiceForm />} />
             <Route path="clients" element={<ClientsManagement onBack={() => window.history.back()} />} />
+            <Route path="time-blocks" element={<TimeBlocks />} />
+            <Route path="financial" element={<FinancialSettings />} />
             <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="/" element={<Login />} />

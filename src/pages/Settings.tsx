@@ -5,8 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { Settings as SettingsIcon, Bell, Shield, MessageSquare, Calendar } from "lucide-react";
+import { Settings as SettingsIcon, Bell, Shield, MessageSquare, Calendar, Clock } from "lucide-react";
 import { settingsApi } from "@/lib/api";
 import {
   Select,
@@ -38,6 +39,7 @@ interface SettingsData {
   
   // Outros
   timeZone: string;
+  slotSize: number;
 }
 
 const Settings = () => {
@@ -56,6 +58,7 @@ const Settings = () => {
     sessionTimeout: 60,
     maxLoginAttempts: 3,
     timeZone: "America/Sao_Paulo",
+    slotSize: 30,
   });
 
   const [confirmationSettings, setConfirmationSettings] = useState({
@@ -386,6 +389,38 @@ const Settings = () => {
                 </SelectContent>
               </Select>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Slot Size */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Tamanho dos Slots de Agendamento
+            </CardTitle>
+            <CardDescription>
+              Defina a duração padrão de cada slot de horário disponível
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RadioGroup
+              value={settings.slotSize.toString()}
+              onValueChange={(value) => handleInputChange("slotSize", parseInt(value))}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="30" id="slot30" />
+                <Label htmlFor="slot30" className="cursor-pointer font-normal">
+                  30 minutos (mais flexibilidade para agendamentos)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="60" id="slot60" />
+                <Label htmlFor="slot60" className="cursor-pointer font-normal">
+                  60 minutos (menos slots, agenda mais espaçada)
+                </Label>
+              </div>
+            </RadioGroup>
           </CardContent>
         </Card>
 

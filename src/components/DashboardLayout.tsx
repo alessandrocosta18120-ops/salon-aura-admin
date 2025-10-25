@@ -33,6 +33,8 @@ const menuItems = [
   { title: "Gerenciar Profissionais", url: "/dashboard/professionals", icon: Users },
   { title: "Cadastrar Serviços", url: "/dashboard/services", icon: Scissors },
   { title: "Administrar Clientes", url: "/dashboard/clients", icon: UserCog },
+  { title: "Bloqueios de Horários", url: "/dashboard/time-blocks", icon: CalendarDays },
+  { title: "Financeiro", url: "/dashboard/financial", icon: Settings },
   { title: "Configurações", url: "/dashboard/settings", icon: Settings },
 ];
 

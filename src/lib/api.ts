@@ -1,7 +1,7 @@
 // API configuration for ASP Classic backend communication
 import { sessionManager } from './session';
 
-const API_BASE_URL = "/api";
+const API_BASE_URL = "/admin/api";
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -83,6 +83,9 @@ export const scheduleApi = {
   setDates: (data: any) => apiCall('setadmdates', data, 'POST'),
   getTimes: () => apiCall('getadmtimes'),
   setTimes: (data: any) => apiCall('setadmtimes', data, 'POST'),
+  getBlocks: () => apiCall('getadmtimeblocks'),
+  setBlock: (data: any) => apiCall('setadmtimeblock', data, 'POST'),
+  deleteBlock: (id: string) => apiCall('deleteadmtimeblock', { id }, 'POST'),
 };
 
 // Appointments APIs
@@ -109,6 +112,10 @@ export const settingsApi = {
   set: (data: any) => apiCall('setadmsettings', data, 'POST'),
   getConfirmation: () => apiCall('getadmconfirmation'),
   setConfirmation: (data: any) => apiCall('setadmconfirmation', data, 'POST'),
+  getFinancial: () => apiCall('getadmfinancial'),
+  setFinancial: (data: any) => apiCall('setadmfinancial', data, 'POST'),
+  getSlotSize: () => apiCall('getadmslotsize'),
+  setSlotSize: (data: any) => apiCall('setadmslotsize', data, 'POST'),
 };
 
 // Authentication APIs (no salonId needed)

@@ -20,7 +20,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/admin_authlogin.asp", {
+      const response = await fetch("/admin/api/admin_authlogin.asp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
@@ -76,7 +76,7 @@ const Login = () => {
           <div>
             <CardTitle className="text-2xl font-bold">Painel Administrativo</CardTitle>
             <CardDescription className="text-muted-foreground">
-              Sistema de gestão para salões de beleza e barbearias
+              Sistema de gestão de agendamentos digitais
             </CardDescription>
           </div>
         </CardHeader>

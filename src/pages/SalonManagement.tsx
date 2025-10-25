@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, MapPin, Phone, Instagram, Facebook, Youtube, Upload, Calendar, X } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Instagram, Facebook, Youtube, Video, Upload, Calendar, X } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { salonApi, holidayApi } from "@/lib/api";
 
@@ -26,6 +26,7 @@ interface SalonData {
   instagram: string;
   facebook: string;
   youtube: string;
+  tiktok: string;
   mainLogo: File | null;
   secondaryLogo: File | null;
   whatsappCustomText: string;
@@ -37,6 +38,7 @@ interface Holiday {
   name: string;
   date: string;
   type: 'municipal' | 'blocked';
+  isRecurring?: boolean;
 }
 
 interface Theme {
@@ -63,7 +65,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
   const [themes, setThemes] = useState<Theme[]>([]);
   const [municipalHolidays, setMunicipalHolidays] = useState<Holiday[]>([]);
   const [blockedDates, setBlockedDates] = useState<Holiday[]>([]);
-  const [newHoliday, setNewHoliday] = useState({ name: '', date: '' });
+  const [newHoliday, setNewHoliday] = useState({ name: '', date: '', isRecurring: false });
   const [newBlockedDate, setNewBlockedDate] = useState({ name: '', date: '' });
   
   const [salonData, setSalonData] = useState<SalonData>({
@@ -81,6 +83,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     instagram: "",
     facebook: "",
     youtube: "",
+    tiktok: "",
     mainLogo: null,
     secondaryLogo: null,
     whatsappCustomText: "",
@@ -167,7 +170,6 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
 
   const handleAddHoliday = async (type: 'municipal' | 'blocked') => {
     const holiday = type === 'municipal' ? newHoliday : newBlockedDate;
-    const setter = type === 'municipal' ? setNewHoliday : setNewBlockedDate;
     
     if (!holiday.name || !holiday.date) {
       toast({
@@ -187,7 +189,11 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
           title: "Feriado cadastrado!",
           description: `${holiday.name} foi adicionado com sucesso.`,
         });
-        setter({ name: '', date: '' });
+        if (type === 'municipal') {
+          setNewHoliday({ name: '', date: '', isRecurring: false });
+        } else {
+          setNewBlockedDate({ name: '', date: '' });
+        }
         loadHolidays();
       }
     } catch (error) {
@@ -436,6 +442,16 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                     onChange={(e) => setNewHoliday(prev => ({ ...prev, date: e.target.value }))}
                   />
                 </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="isRecurring"
+                    checked={newHoliday.isRecurring}
+                    onCheckedChange={(checked) => setNewHoliday(prev => ({ ...prev, isRecurring: checked as boolean }))}
+                  />
+                  <Label htmlFor="isRecurring" className="text-sm font-normal cursor-pointer">
+                    Feriado Recorrente (todos os anos)
+                  </Label>
+                </div>
                 <Button onClick={() => handleAddHoliday('municipal')} className="w-full">
                   Adicionar Feriado Municipal
                 </Button>
@@ -651,6 +667,19 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                     value={salonData.youtube}
                     onChange={(e) => handleInputChange("youtube", e.target.value)}
                     placeholder="youtube.com/seusalao"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tiktok">TikTok</Label>
+                <div className="relative">
+                  <Video className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="tiktok"
+                    value={salonData.tiktok}
+                    onChange={(e) => handleInputChange("tiktok", e.target.value)}
+                    placeholder="tiktok.com/@seusalao"
                     className="pl-10"
                   />
                 </div>
