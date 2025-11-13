@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Users, Phone, MessageSquare } from "lucide-react";
 import { clientApi } from "@/lib/api";
+import { PageHeader } from "@/components/PageHeader";
+import { sessionManager } from "@/lib/session";
 
 interface Client {
   id: string;
@@ -105,7 +107,11 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
     }
 
     try {
-      const response = await clientApi.setFixed(newFixedClient);
+      const userId = sessionManager.getSessionId();
+      const salonId = sessionManager.getSalonId();
+      const dataToSend = { ...newFixedClient, userId, salonId };
+      
+      const response = await clientApi.setFixed(dataToSend);
       if (response.success) {
         toast({
           title: "Cliente fixo cadastrado!",
@@ -211,18 +217,11 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Gerenciamento de Clientes</h2>
-          <p className="text-muted-foreground">
-            Gerencie clientes cadastrados, fixos e evadidos
-          </p>
-        </div>
-      </div>
+      <PageHeader 
+        title="Gerenciamento de Clientes"
+        description="Gerencie clientes cadastrados, fixos e evadidos"
+        showBack={false}
+      />
 
       {/* Tab Navigation */}
       <div className="flex gap-2">

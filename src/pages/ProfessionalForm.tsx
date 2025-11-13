@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Upload } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { professionalApi } from "@/lib/api";
+import { PageHeader } from "@/components/PageHeader";
+import { sessionManager } from "@/lib/session";
 
 interface Professional {
   id?: string;
@@ -91,7 +93,13 @@ const ProfessionalForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await professionalApi.set(formData);
+      const salonId = sessionManager.getSalonId();
+      const dataToSend = { ...formData, salonId };
+      if (id) {
+        dataToSend.id = id;
+      }
+      
+      const response = await professionalApi.set(dataToSend);
       
       if (response.success) {
         toast({
@@ -117,20 +125,10 @@ const ProfessionalForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate("/dashboard/professionals")} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {id ? "Editar Profissional" : "Novo Profissional"}
-          </h2>
-          <p className="text-muted-foreground">
-            {id ? "Atualize as informações do profissional" : "Cadastre um novo profissional no sistema"}
-          </p>
-        </div>
-      </div>
+      <PageHeader 
+        title={id ? "Editar Profissional" : "Novo Profissional"}
+        description={id ? "Atualize as informações do profissional" : "Cadastre um novo profissional no sistema"}
+      />
 
       <form onSubmit={handleSubmit}>
         <Card>

@@ -6,9 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, DollarSign, CreditCard, Building } from "lucide-react";
+import { DollarSign, CreditCard, Building } from "lucide-react";
 import { settingsApi } from "@/lib/api";
-import { useNavigate } from "react-router-dom";
+import { PageHeader } from "@/components/PageHeader";
+import { sessionManager } from "@/lib/session";
 
 interface FinancialData {
   enablePayment: boolean;
@@ -23,7 +24,6 @@ interface FinancialData {
 
 const FinancialSettings = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FinancialData>({
     enablePayment: false,
@@ -60,7 +60,10 @@ const FinancialSettings = () => {
     setIsLoading(true);
 
     try {
-      const response = await settingsApi.setFinancial(formData);
+      const salonId = sessionManager.getSalonId();
+      const dataToSend = { ...formData, salonId };
+      
+      const response = await settingsApi.setFinancial(dataToSend);
       
       if (response.success) {
         toast({
@@ -83,18 +86,10 @@ const FinancialSettings = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Configurações Financeiras</h2>
-          <p className="text-muted-foreground">
-            Configure os dados bancários e opções de pagamento
-          </p>
-        </div>
-      </div>
+      <PageHeader 
+        title="Configurações Financeiras"
+        description="Configure os dados bancários e opções de pagamento"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>

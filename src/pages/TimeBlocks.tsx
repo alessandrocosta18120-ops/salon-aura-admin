@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Clock, Plus, X, ArrowLeft } from "lucide-react";
 import { professionalApi, scheduleApi } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
+import { PageHeader } from "@/components/PageHeader";
+import { sessionManager } from "@/lib/session";
 
 interface TimeBlock {
   id?: string;
@@ -74,7 +76,11 @@ const TimeBlocks = () => {
     }
 
     try {
-      const response = await scheduleApi.setBlock(newBlock);
+      const userId = sessionManager.getSessionId();
+      const salonId = sessionManager.getSalonId();
+      const dataToSend = { ...newBlock, userId, salonId };
+      
+      const response = await scheduleApi.setBlock(dataToSend);
       if (response.success) {
         toast({
           title: "Bloqueio adicionado!",
@@ -123,18 +129,10 @@ const TimeBlocks = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Bloqueios de Horários</h2>
-          <p className="text-muted-foreground">
-            Gerencie os horários bloqueados para cada profissional
-          </p>
-        </div>
-      </div>
+      <PageHeader 
+        title="Bloqueios de Horários"
+        description="Gerencie os horários bloqueados para cada profissional"
+      />
 
       <Card>
         <CardHeader>

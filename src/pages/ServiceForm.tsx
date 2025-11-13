@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { serviceApi, professionalApi } from "@/lib/api";
 import { serviceSchema, getValidationErrorMessage } from "@/lib/validation";
+import { PageHeader } from "@/components/PageHeader";
+import { sessionManager } from "@/lib/session";
 
 interface Service {
   id?: string;
@@ -67,11 +69,12 @@ const ServiceForm = () => {
         const service = response.data.find((s: any) => s.id === id);
         if (service) {
           setFormData({
+            id: service.id,
             name: service.name,
             description: service.description,
             duration: service.duration,
             price: service.price,
-            professionalIds: service.professionalIds || [],
+            professionalIds: Array.isArray(service.professionalIds) ? service.professionalIds : [],
             isActive: service.isActive,
           });
         }
@@ -115,9 +118,12 @@ const ServiceForm = () => {
         return;
       }
 
+      const salonId = sessionManager.getSalonId();
       const dataToSend = id 
-        ? { ...validationResult.data, id }
-        : validationResult.data;
+        ? { ...validationResult.data, id, salonId }
+        : { ...validationResult.data, salonId };
+
+      console.log("Enviando dados do serviço:", dataToSend);
 
       const response = await serviceApi.set(dataToSend);
       
@@ -145,20 +151,10 @@ const ServiceForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate("/dashboard/services")} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {id ? "Editar Serviço" : "Novo Serviço"}
-          </h2>
-          <p className="text-muted-foreground">
-            {id ? "Atualize as informações do serviço" : "Cadastre um novo serviço no sistema"}
-          </p>
-        </div>
-      </div>
+      <PageHeader 
+        title={id ? "Editar Serviço" : "Novo Serviço"}
+        description={id ? "Atualize as informações do serviço" : "Cadastre um novo serviço no sistema"}
+      />
 
       <form onSubmit={handleSubmit}>
         <Card>
