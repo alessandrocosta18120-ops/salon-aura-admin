@@ -25,7 +25,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/admin">
         <ScrollToTop />
         <Routes>
           <Route path="/login" element={<Login />} />

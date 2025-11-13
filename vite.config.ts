@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1500,
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'admin.html')
+        main: path.resolve(__dirname, 'index.html')
       },
       output: {
         manualChunks: {
