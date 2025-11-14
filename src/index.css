@@ -21,7 +21,7 @@ All colors MUST be HSL. Professional, modern, elegant aesthetic.
 
     /* Primary - Professional deep blue */
     --primary: 215 84% 45%;
-    --primary-foreground: 0 0% 98%;
+    --primary-foreground: 0 0% 10%;
     --primary-hover: 215 84% 55%;
     --primary-muted: 215 84% 95%;
 

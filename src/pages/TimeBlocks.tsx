@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Clock, Plus, X, ArrowLeft } from "lucide-react";
 import { professionalApi, scheduleApi } from "@/lib/api";
@@ -18,6 +19,8 @@ interface TimeBlock {
   startTime: string;
   endTime: string;
   reason: string;
+  isRecurring?: boolean;
+  recurrenceType?: "weekdays" | "all_days" | "day_of_week";
 }
 
 interface Professional {
@@ -36,6 +39,8 @@ const TimeBlocks = () => {
     startTime: "",
     endTime: "",
     reason: "",
+    isRecurring: false,
+    recurrenceType: "all_days",
   });
 
   useEffect(() => {
@@ -92,6 +97,8 @@ const TimeBlocks = () => {
           startTime: "",
           endTime: "",
           reason: "",
+          isRecurring: false,
+          recurrenceType: "all_days",
         });
         loadTimeBlocks();
       }
@@ -203,6 +210,42 @@ const TimeBlocks = () => {
                 onChange={(e) => setNewBlock(prev => ({ ...prev, reason: e.target.value }))}
                 placeholder="Ex: Almoço, Reunião, Buscar filho na escola..."
               />
+            </div>
+
+            <div className="md:col-span-2 space-y-4 border-t pt-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isRecurring"
+                  checked={newBlock.isRecurring}
+                  onCheckedChange={(checked) => 
+                    setNewBlock(prev => ({ ...prev, isRecurring: checked as boolean }))
+                  }
+                />
+                <Label htmlFor="isRecurring" className="font-semibold">
+                  Bloqueio Recorrente
+                </Label>
+              </div>
+
+              {newBlock.isRecurring && (
+                <div className="space-y-2">
+                  <Label htmlFor="recurrenceType">Tipo de Recorrência</Label>
+                  <Select
+                    value={newBlock.recurrenceType}
+                    onValueChange={(value) => 
+                      setNewBlock(prev => ({ ...prev, recurrenceType: value as "weekdays" | "all_days" | "day_of_week" }))
+                    }
+                  >
+                    <SelectTrigger id="recurrenceType">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all_days">Todos os Dias</SelectItem>
+                      <SelectItem value="weekdays">Dias Úteis</SelectItem>
+                      <SelectItem value="day_of_week">Dia da Semana (mesmo dia)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </div>
 

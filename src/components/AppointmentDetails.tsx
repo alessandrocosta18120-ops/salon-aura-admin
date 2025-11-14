@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, User, Phone, MessageSquare, ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
+import { ArrowLeft, Clock, User, Phone, MessageSquare, ChevronLeft, ChevronRight, CalendarIcon, Send } from "lucide-react";
 import { appointmentApi } from "@/lib/api";
 import { format, addDays, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AppointmentReminders } from "./AppointmentReminders";
 
 interface Appointment {
   id: string;
@@ -28,6 +29,7 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [sendReminderToProfessional, setSendReminderToProfessional] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showReminders, setShowReminders] = useState(false);
 
   useEffect(() => {
     loadAppointments(selectedDate);
@@ -114,6 +116,10 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
 
   const sortedTimes = Object.keys(groupedAppointments).sort();
 
+  if (showReminders) {
+    return <AppointmentReminders selectedDate={selectedDate} onBack={() => setShowReminders(false)} />;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -179,7 +185,7 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
             Configure lembretes automáticos para profissionais
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
             <Checkbox
               id="professionalReminder"
@@ -193,6 +199,15 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
               Enviar lembrete no WhatsApp dos profissionais sobre agendamentos do próximo dia
             </label>
           </div>
+          
+          <Button 
+            onClick={() => setShowReminders(true)}
+            className="w-full"
+            variant="outline"
+          >
+            <Send className="w-4 h-4 mr-2" />
+            Enviar Lembretes para esta Data
+          </Button>
         </CardContent>
       </Card>
 

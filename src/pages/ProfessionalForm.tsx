@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Upload } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { professionalApi } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
@@ -116,6 +116,39 @@ const ProfessionalForm = () => {
       toast({
         title: "Erro ao salvar",
         description: error instanceof Error ? error.message : "Não foi possível salvar o profissional.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    
+    const confirmed = window.confirm(
+      "TEM CERTEZA QUE DESEJA APAGAR O ITEM SELECIONADO?\n\nEsta ação não pode ser desfeita."
+    );
+    
+    if (!confirmed) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await professionalApi.delete(id);
+      
+      if (response.success) {
+        toast({
+          title: "Profissional apagado!",
+          description: "O profissional foi removido com sucesso.",
+        });
+        navigate("/dashboard/professionals");
+      } else {
+        throw new Error(response.error || "Erro ao apagar profissional");
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao apagar",
+        description: error instanceof Error ? error.message : "Não foi possível apagar o profissional.",
         variant: "destructive",
       });
     } finally {
@@ -263,6 +296,18 @@ const ProfessionalForm = () => {
               >
                 Cancelar
               </Button>
+              {id && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isLoading}
+                  className="flex-1"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Apagar
+                </Button>
+              )}
               <Button
                 type="submit"
                 disabled={isLoading}
