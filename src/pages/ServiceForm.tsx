@@ -3,16 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { X } from "lucide-react";
 import { serviceApi, professionalApi } from "@/lib/api";
 import { serviceSchema, getValidationErrorMessage } from "@/lib/validation";
 import { PageHeader } from "@/components/PageHeader";
 import { sessionManager } from "@/lib/session";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 
 interface Service {
   id?: string;
@@ -149,6 +149,39 @@ const ServiceForm = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!id) return;
+    
+    const confirmed = window.confirm(
+      "TEM CERTEZA QUE DESEJA APAGAR O ITEM SELECIONADO?\n\nEsta ação não pode ser desfeita."
+    );
+    
+    if (!confirmed) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await serviceApi.delete(id);
+      
+      if (response.success) {
+        toast({
+          title: "Serviço apagado!",
+          description: "O serviço foi removido com sucesso.",
+        });
+        navigate("/dashboard/services");
+      } else {
+        throw new Error(response.error || "Erro ao apagar serviço");
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao apagar",
+        description: error instanceof Error ? error.message : "Não foi possível apagar o serviço.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -253,6 +286,18 @@ const ServiceForm = () => {
               >
                 Cancelar
               </Button>
+              {id && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isLoading}
+                  className="flex-1"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Apagar
+                </Button>
+              )}
               <Button
                 type="submit"
                 disabled={isLoading}
