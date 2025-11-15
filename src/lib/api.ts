@@ -81,6 +81,7 @@ export const serviceApi = {
 export const scheduleApi = {
   getDates: () => apiCall('getadmdates'),
   setDates: (data: any) => apiCall('setadmdates', data, 'POST'),
+  deleteDate: (id: string) => apiCall('deleteadmdate', { id }, 'POST'),
   getTimes: () => apiCall('getadmtimes'),
   setTimes: (data: any) => apiCall('setadmtimes', data, 'POST'),
   getBlocks: () => apiCall('getadmtimeblocks'),
@@ -130,6 +131,8 @@ export const authApi = {
 export const holidayApi = {
   getMunicipal: () => apiCall('getadmmunicipalidays'),
   setMunicipal: (data: any) => apiCall('setadmmunicipalidays', data, 'POST'),
+  deleteMunicipal: (id: string) => apiCall('deleteadmmunicipalholiday', { id }, 'POST'),
   getBlocked: () => apiCall('getadmblockeddates'),
   setBlocked: (data: any) => apiCall('setadmblockeddates', data, 'POST'),
+  deleteBlocked: (id: string) => apiCall('deleteadmblockedday', { id }, 'POST'),
 };

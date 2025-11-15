@@ -3,6 +3,8 @@ export interface SessionData {
   sessionId: string;
   salonId: string;
   userName?: string;
+  userId?: string;
+  slug?: string;
 }
 
 const SESSION_KEY = 'salon_admin_session';
@@ -25,6 +27,16 @@ export const sessionManager = {
   getSessionId(): string | null {
     const session = this.get();
     return session?.sessionId || null;
+  },
+
+  getUserId(): string | null {
+    const session = this.get();
+    return session?.userId || null;
+  },
+
+  getSlug(): string | null {
+    const session = this.get();
+    return session?.slug || null;
   },
 
   clear() {

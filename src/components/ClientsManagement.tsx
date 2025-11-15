@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Users, Phone, MessageSquare } from "lucide-react";
-import { clientApi } from "@/lib/api";
+import { clientApi, professionalApi, serviceApi } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { sessionManager } from "@/lib/session";
 
@@ -17,6 +17,16 @@ interface Client {
   phone: string;
   email: string;
   lastVisit: string;
+}
+
+interface Professional {
+  id: string;
+  name: string;
+}
+
+interface Service {
+  id: string;
+  name: string;
 }
 
 interface FixedClient {
@@ -38,6 +48,8 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
   const [clients, setClients] = useState<Client[]>([]);
   const [fixedClients, setFixedClients] = useState<FixedClient[]>([]);
   const [churnedClients, setChurnedClients] = useState<Client[]>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Fixed client form
@@ -64,7 +76,31 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
 
   useEffect(() => {
     loadData();
+    loadProfessionals();
+    loadServices();
   }, [activeTab]);
+
+  const loadProfessionals = async () => {
+    try {
+      const response = await professionalApi.get();
+      if (response.success && response.data) {
+        setProfessionals(response.data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar profissionais:", error);
+    }
+  };
+
+  const loadServices = async () => {
+    try {
+      const response = await serviceApi.get();
+      if (response.success && response.data) {
+        setServices(response.data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar serviços:", error);
+    }
+  };
 
   const loadData = async () => {
     setIsLoading(true);
@@ -441,6 +477,49 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
                     value={newFixedClient.time}
                     onChange={(e) => setNewFixedClient(prev => ({ ...prev, time: e.target.value }))}
                   />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Profissional *</Label>
+                  <Select
+                    value={newFixedClient.professionalId}
+                    onValueChange={(value) =>
+                      setNewFixedClient(prev => ({ ...prev, professionalId: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o profissional" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {professionals.map((prof) => (
+                        <SelectItem key={prof.id} value={prof.id}>
+                          {prof.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Serviço *</Label>
+                  <Select
+                    value={newFixedClient.serviceId}
+                    onValueChange={(value) =>
+                      setNewFixedClient(prev => ({ ...prev, serviceId: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o serviço" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {services.map((service) => (
+                        <SelectItem key={service.id} value={service.id}>
+                          {service.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, MapPin, Phone, Instagram, Facebook, Youtube, Video, Upload, Calendar, X } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { salonApi, holidayApi } from "@/lib/api";
+import { sessionManager } from "@/lib/session";
 
 interface SalonData {
   name: string;
@@ -181,8 +182,13 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     }
 
     try {
+      const userId = sessionManager.getUserId();
+      const salonId = sessionManager.getSalonId();
+      const slug = sessionManager.getSlug();
+      const dataToSend = { ...holiday, userId, salonId, slug };
+      
       const api = type === 'municipal' ? holidayApi.setMunicipal : holidayApi.setBlocked;
-      const response = await api(holiday);
+      const response = await api(dataToSend);
       
       if (response.success) {
         toast({
@@ -206,11 +212,30 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
   };
 
   const handleRemoveHoliday = async (id: string, type: 'municipal' | 'blocked') => {
-    // TODO: Implement holiday removal
-    toast({
-      title: "Feriado removido",
-      description: "O feriado foi removido com sucesso.",
-    });
+    if (!window.confirm('TEM CERTEZA QUE DESEJA APAGAR O ITEM SELECIONADO?')) {
+      return;
+    }
+
+    try {
+      const api = type === 'municipal' ? holidayApi.deleteMunicipal : holidayApi.deleteBlocked;
+      const response = await api(id);
+      
+      if (response.success) {
+        toast({
+          title: "Feriado removido!",
+          description: "O feriado foi removido com sucesso.",
+        });
+        loadHolidays();
+      } else {
+        throw new Error(response.error || 'Erro ao remover');
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao remover",
+        description: "Não foi possível remover o feriado.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
