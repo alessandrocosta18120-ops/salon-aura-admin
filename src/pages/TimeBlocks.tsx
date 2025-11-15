@@ -81,9 +81,10 @@ const TimeBlocks = () => {
     }
 
     try {
-      const userId = sessionManager.getSessionId();
+      const userId = sessionManager.getUserId();
       const salonId = sessionManager.getSalonId();
-      const dataToSend = { ...newBlock, userId, salonId };
+      const slug = sessionManager.getSlug();
+      const dataToSend = { ...newBlock, userId, salonId, slug };
       
       const response = await scheduleApi.setBlock(dataToSend);
       if (response.success) {
