@@ -24,6 +24,8 @@ interface SalonData {
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
+  successColor: string;
+  warningColor: string;
   instagram: string;
   facebook: string;
   youtube: string;
@@ -48,6 +50,8 @@ interface Theme {
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
+  successColor: string;
+  warningColor: string;
 }
 
 const weekDays = [
@@ -81,6 +85,8 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     primaryColor: "#3b82f6",
     secondaryColor: "#8b5cf6",
     accentColor: "#10b981",
+    successColor: "#10b981",
+    warningColor: "#f59e0b",
     instagram: "",
     facebook: "",
     youtube: "",
@@ -113,11 +119,11 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
       const response = await salonApi.getThemes();
       if (response.success) {
         setThemes(response.data || [
-          { id: 'azul', name: 'Azul', primaryColor: '#3b82f6', secondaryColor: '#1e40af', accentColor: '#06b6d4' },
-          { id: 'rosa', name: 'Rosa', primaryColor: '#ec4899', secondaryColor: '#be185d', accentColor: '#f97316' },
-          { id: 'preto', name: 'Preto', primaryColor: '#1f2937', secondaryColor: '#374151', accentColor: '#6b7280' },
-          { id: 'cinza', name: 'Cinza', primaryColor: '#6b7280', secondaryColor: '#4b5563', accentColor: '#9ca3af' },
-          { id: 'verde', name: 'Verde', primaryColor: '#10b981', secondaryColor: '#059669', accentColor: '#34d399' },
+          { id: 'azul', name: 'Azul', primaryColor: '#3b82f6', secondaryColor: '#1e40af', accentColor: '#06b6d4', successColor: '#10b981', warningColor: '#f59e0b' },
+          { id: 'rosa', name: 'Rosa', primaryColor: '#ec4899', secondaryColor: '#be185d', accentColor: '#f97316', successColor: '#10b981', warningColor: '#fbbf24' },
+          { id: 'preto', name: 'Preto', primaryColor: '#1f2937', secondaryColor: '#374151', accentColor: '#6b7280', successColor: '#10b981', warningColor: '#f59e0b' },
+          { id: 'cinza', name: 'Cinza', primaryColor: '#6b7280', secondaryColor: '#4b5563', accentColor: '#9ca3af', successColor: '#10b981', warningColor: '#f59e0b' },
+          { id: 'verde', name: 'Verde', primaryColor: '#10b981', secondaryColor: '#059669', accentColor: '#34d399', successColor: '#22c55e', warningColor: '#f59e0b' },
         ]);
       }
     } catch (error) {
@@ -156,6 +162,8 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
         primaryColor: theme.primaryColor,
         secondaryColor: theme.secondaryColor,
         accentColor: theme.accentColor,
+        successColor: theme.successColor,
+        warningColor: theme.warningColor,
       }));
     }
   };
@@ -649,6 +657,42 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                       value={salonData.accentColor}
                       onChange={(e) => handleInputChange("accentColor", e.target.value)}
                       placeholder="#10b981"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="successColor">Cor de Sucesso</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="successColor"
+                      type="color"
+                      value={salonData.successColor}
+                      onChange={(e) => handleInputChange("successColor", e.target.value)}
+                      className="w-16 h-10"
+                    />
+                    <Input
+                      value={salonData.successColor}
+                      onChange={(e) => handleInputChange("successColor", e.target.value)}
+                      placeholder="#10b981"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="warningColor">Cor de Aviso</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="warningColor"
+                      type="color"
+                      value={salonData.warningColor}
+                      onChange={(e) => handleInputChange("warningColor", e.target.value)}
+                      className="w-16 h-10"
+                    />
+                    <Input
+                      value={salonData.warningColor}
+                      onChange={(e) => handleInputChange("warningColor", e.target.value)}
+                      placeholder="#f59e0b"
                       className="flex-1"
                     />
                   </div>
