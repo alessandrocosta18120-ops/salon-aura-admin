@@ -243,7 +243,18 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     setIsLoading(true);
 
     try {
-      const response = await salonApi.set(salonData);
+      const userId = sessionManager.getUserId();
+      const slug = sessionManager.getSlug();
+      
+      // Prepare payload with userId and slug, remove any existing salonid to avoid duplication
+      const { salonid, ...cleanData } = salonData as any;
+      const payload = {
+        ...cleanData,
+        userId,
+        slug
+      };
+
+      const response = await salonApi.set(payload);
       
       if (response.success) {
         toast({
