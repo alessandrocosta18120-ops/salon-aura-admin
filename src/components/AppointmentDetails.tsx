@@ -30,6 +30,8 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
   const [sendReminderToProfessional, setSendReminderToProfessional] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showReminders, setShowReminders] = useState(false);
+  const [whatsappSent, setWhatsappSent] = useState<Record<string, boolean>>({});
+  const [phoneCalled, setPhoneCalled] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     loadAppointments(selectedDate);
@@ -103,6 +105,49 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
       default:
         return 'Desconhecido';
     }
+  };
+
+  const handleWhatsAppClick = async (appointment: Appointment) => {
+    const message = `Olá ${appointment.clientName}! Confirmando seu agendamento para ${format(selectedDate, "dd/MM/yyyy", { locale: ptBR })} às ${appointment.time} com ${appointment.professionalName} - ${appointment.serviceName}.`;
+    const whatsappUrl = `https://wa.me/${appointment.clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    
+    window.open(whatsappUrl, '_blank');
+    
+    // Mark as sent
+    setWhatsappSent(prev => ({ ...prev, [appointment.id]: true }));
+    
+    // Update status to confirmed if pending
+    if (appointment.status === 'pending') {
+      try {
+        await appointmentApi.set({ 
+          id: appointment.id, 
+          status: 'confirmed' 
+        });
+        
+        // Reload appointments to reflect status change
+        await loadAppointments(selectedDate);
+        
+        toast({
+          title: "Status atualizado",
+          description: "Agendamento confirmado com sucesso.",
+          className: "bg-blue-50 border-blue-200",
+        });
+      } catch (error) {
+        toast({
+          title: "Erro ao atualizar status",
+          description: "Não foi possível confirmar o agendamento.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handlePhoneClick = (appointment: Appointment) => {
+    const telUrl = `tel:${appointment.clientPhone.replace(/\D/g, '')}`;
+    window.location.href = telUrl;
+    
+    // Mark as called
+    setPhoneCalled(prev => ({ ...prev, [appointment.id]: true }));
   };
 
   // Group appointments by time
@@ -271,13 +316,23 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="flex-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className={`flex-1 ${phoneCalled[appointment.id] ? 'text-destructive border-destructive' : ''}`}
+                          onClick={() => handlePhoneClick(appointment)}
+                        >
                           <Phone className="h-4 w-4 mr-2" />
-                          Ligar
+                          {phoneCalled[appointment.id] ? 'Telefonado' : 'Ligar'}
                         </Button>
-                        <Button size="sm" variant="outline" className="flex-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className={`flex-1 ${whatsappSent[appointment.id] ? 'text-destructive border-destructive' : ''}`}
+                          onClick={() => handleWhatsAppClick(appointment)}
+                        >
                           <MessageSquare className="h-4 w-4 mr-2" />
-                          WhatsApp
+                          {whatsappSent[appointment.id] ? 'WhatsApp enviado' : 'WhatsApp'}
                         </Button>
                       </div>
                     </div>
