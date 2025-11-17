@@ -94,7 +94,9 @@ const ProfessionalForm = () => {
 
     try {
       const salonId = sessionManager.getSalonId();
-      const dataToSend = { ...formData, salonId };
+      const userId = sessionManager.getUserId();
+      const slug = sessionManager.getSlug();
+      const dataToSend = { ...formData, salonId, userId, slug };
       if (id) {
         dataToSend.id = id;
       }
@@ -107,6 +109,7 @@ const ProfessionalForm = () => {
           description: id 
             ? "As informações foram atualizadas com sucesso."
             : "O profissional foi adicionado com sucesso.",
+          className: "bg-blue-50 border-blue-200",
         });
         navigate("/dashboard/professionals");
       } else {
