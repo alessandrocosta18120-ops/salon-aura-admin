@@ -119,9 +119,11 @@ const ServiceForm = () => {
       }
 
       const salonId = sessionManager.getSalonId();
+      const userId = sessionManager.getUserId();
+      const slug = sessionManager.getSlug();
       const dataToSend = id 
-        ? { ...validationResult.data, id, salonId }
-        : { ...validationResult.data, salonId };
+        ? { ...validationResult.data, id, salonId, userId, slug }
+        : { ...validationResult.data, salonId, userId, slug };
 
       console.log("Enviando dados do serviço:", dataToSend);
 
@@ -133,6 +135,7 @@ const ServiceForm = () => {
           description: id 
             ? "As informações foram atualizadas com sucesso."
             : "O serviço foi adicionado com sucesso.",
+          className: "bg-blue-50 border-blue-200",
         });
         navigate("/dashboard/services");
       } else {

@@ -42,6 +42,7 @@ interface Holiday {
   date: string;
   type: 'municipal' | 'blocked';
   isRecurring?: boolean;
+  professionalId?: string;
 }
 
 interface Theme {
@@ -70,8 +71,8 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
   const [themes, setThemes] = useState<Theme[]>([]);
   const [municipalHolidays, setMunicipalHolidays] = useState<Holiday[]>([]);
   const [blockedDates, setBlockedDates] = useState<Holiday[]>([]);
-  const [newHoliday, setNewHoliday] = useState({ name: '', date: '', isRecurring: false });
-  const [newBlockedDate, setNewBlockedDate] = useState({ name: '', date: '' });
+  const [newHoliday, setNewHoliday] = useState({ name: '', date: '', isRecurring: false, professionalId: '' });
+  const [newBlockedDate, setNewBlockedDate] = useState({ name: '', date: '', professionalId: '' });
   
   const [salonData, setSalonData] = useState<SalonData>({
     name: "",
@@ -193,7 +194,13 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
       const userId = sessionManager.getUserId();
       const salonId = sessionManager.getSalonId();
       const slug = sessionManager.getSlug();
-      const dataToSend = { ...holiday, userId, salonId, slug };
+      const dataToSend = { 
+        ...holiday, 
+        userId, 
+        salonId, 
+        slug,
+        professionalId: holiday.professionalId || null 
+      };
       
       const api = type === 'municipal' ? holidayApi.setMunicipal : holidayApi.setBlocked;
       const response = await api(dataToSend);
@@ -202,11 +209,12 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
         toast({
           title: "Feriado cadastrado!",
           description: `${holiday.name} foi adicionado com sucesso.`,
+          className: "bg-blue-50 border-blue-200",
         });
         if (type === 'municipal') {
-          setNewHoliday({ name: '', date: '', isRecurring: false });
+          setNewHoliday({ name: '', date: '', isRecurring: false, professionalId: '' });
         } else {
-          setNewBlockedDate({ name: '', date: '' });
+          setNewBlockedDate({ name: '', date: '', professionalId: '' });
         }
         loadHolidays();
       }
@@ -232,6 +240,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
         toast({
           title: "Feriado removido!",
           description: "O feriado foi removido com sucesso.",
+          className: "bg-blue-50 border-blue-200",
         });
         loadHolidays();
       } else {
@@ -254,10 +263,15 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
       const userId = sessionManager.getUserId();
       const slug = sessionManager.getSlug();
       
-      // Prepare payload with userId and slug, remove any existing salonid to avoid duplication
-      const { salonid, ...cleanData } = salonData as any;
+      // Prepare payload with userId, slug and all 5 colors (renamed foreground to accent)
+      const { salonid, foregroundColor, ...cleanData } = salonData as any;
       const payload = {
         ...cleanData,
+        primaryColor: salonData.primaryColor,
+        secondaryColor: salonData.secondaryColor,
+        accentColor: salonData.accentColor,
+        successColor: salonData.successColor,
+        warningColor: salonData.warningColor,
         userId,
         slug
       };
@@ -268,6 +282,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
         toast({
           title: "Salão atualizado com sucesso!",
           description: "As informações foram salvas.",
+          className: "bg-blue-50 border-blue-200",
         });
       } else {
         throw new Error(response.error || 'Erro desconhecido');
@@ -460,10 +475,10 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Feriados Municipais
+                Feriados
               </CardTitle>
               <CardDescription>
-                Configure os feriados municipais em que o salão não funcionará
+                Configure os feriados em que o salão não funcionará
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

@@ -102,7 +102,9 @@ const Settings = () => {
 
     try {
       const salonId = sessionManager.getSalonId();
-      const dataToSend = { ...settings, salonId };
+      const userId = sessionManager.getUserId();
+      const slug = sessionManager.getSlug();
+      const dataToSend = { ...settings, salonId, userId, slug };
       
       const response = await settingsApi.set(dataToSend);
       
@@ -110,6 +112,7 @@ const Settings = () => {
         toast({
           title: "Configurações salvas!",
           description: "As configurações foram atualizadas com sucesso.",
+          className: "bg-blue-50 border-blue-200",
         });
       } else {
         throw new Error(response.error || "Erro ao salvar configurações");

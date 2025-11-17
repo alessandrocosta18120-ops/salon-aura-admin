@@ -4,9 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, User, Calendar, Clock, Ban, Edit } from "lucide-react";
+import { Plus, User, Calendar, Clock, Ban, Edit, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { professionalApi } from "@/lib/api";
+import { professionalApi, appointmentApi } from "@/lib/api";
+import { ReassignAppointmentsDialog } from "@/components/ReassignAppointmentsDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Table,
   TableBody,
@@ -42,6 +53,10 @@ const ProfessionalsManagement = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [showReassignDialog, setShowReassignDialog] = useState(false);
+  const [showSimpleDeleteDialog, setShowSimpleDeleteDialog] = useState(false);
+  const [professionalToDelete, setProfessionalToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [appointmentsToReassign, setAppointmentsToReassign] = useState<any[]>([]);
 
   useEffect(() => {
     loadProfessionals();
@@ -61,6 +76,97 @@ const ProfessionalsManagement = () => {
         description: error instanceof Error ? error.message : "Não foi possível carregar a lista de profissionais.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleDeleteClick = async (professional: Professional) => {
+    setProfessionalToDelete({ id: professional.id, name: professional.name });
+    
+    // Verificar se existem agendamentos para este profissional
+    try {
+      const response = await appointmentApi.get();
+      if (response.success && response.data) {
+        const professionalAppointments = response.data.filter(
+          (apt: any) => apt.professionalId === professional.id && new Date(apt.date) >= new Date()
+        );
+        
+        if (professionalAppointments.length > 0) {
+          setAppointmentsToReassign(professionalAppointments);
+          setShowReassignDialog(true);
+        } else {
+          setShowSimpleDeleteDialog(true);
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível verificar agendamentos.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!professionalToDelete) return;
+
+    try {
+      const response = await professionalApi.delete(professionalToDelete.id);
+      if (response.success) {
+        toast({
+          title: "Profissional excluído!",
+          description: "O profissional foi removido com sucesso.",
+          className: "bg-blue-50 border-blue-200",
+        });
+        loadProfessionals();
+      } else {
+        throw new Error(response.error || "Erro ao excluir");
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao excluir",
+        description: error instanceof Error ? error.message : "Não foi possível excluir o profissional.",
+        variant: "destructive",
+      });
+    } finally {
+      setShowSimpleDeleteDialog(false);
+      setProfessionalToDelete(null);
+    }
+  };
+
+  const handleConfirmReassign = async (reassignments: Record<string, string>) => {
+    if (!professionalToDelete) return;
+
+    try {
+      // Reatribuir cada agendamento
+      for (const [appointmentId, newProfessionalId] of Object.entries(reassignments)) {
+        await appointmentApi.set({
+          id: appointmentId,
+          professionalId: newProfessionalId,
+        });
+      }
+
+      // Excluir o profissional
+      const response = await professionalApi.delete(professionalToDelete.id);
+      if (response.success) {
+        toast({
+          title: "Profissional excluído!",
+          description: "Os agendamentos foram reatribuídos e o profissional foi removido.",
+          className: "bg-blue-50 border-blue-200",
+        });
+        loadProfessionals();
+      } else {
+        throw new Error(response.error || "Erro ao excluir");
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao processar",
+        description: error instanceof Error ? error.message : "Não foi possível concluir a operação.",
+        variant: "destructive",
+      });
+    } finally {
+      setShowReassignDialog(false);
+      setProfessionalToDelete(null);
+      setAppointmentsToReassign([]);
     }
   };
 
@@ -146,14 +252,25 @@ const ProfessionalsManagement = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/dashboard/professionals/edit/${professional.id}`)}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Editar
-                  </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/dashboard/professionals/edit/${professional.id}`)}
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteClick(professional)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -161,6 +278,38 @@ const ProfessionalsManagement = () => {
           </Table>
         </CardContent>
       </Card>
+
+      <ReassignAppointmentsDialog
+        open={showReassignDialog}
+        onOpenChange={setShowReassignDialog}
+        appointments={appointmentsToReassign}
+        professionals={professionals}
+        professionalToDelete={professionalToDelete}
+        onConfirm={handleConfirmReassign}
+      />
+
+      <AlertDialog open={showSimpleDeleteDialog} onOpenChange={setShowSimpleDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o profissional{" "}
+              <strong>{professionalToDelete?.name}</strong>?
+              <br />
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Confirmar Exclusão
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

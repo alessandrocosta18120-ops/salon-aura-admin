@@ -91,6 +91,7 @@ const TimeBlocks = () => {
         toast({
           title: "Bloqueio adicionado!",
           description: "O horário foi bloqueado com sucesso.",
+          className: "bg-blue-50 border-blue-200",
         });
         setNewBlock({
           professionalId: "",
@@ -119,6 +120,7 @@ const TimeBlocks = () => {
         toast({
           title: "Bloqueio removido",
           description: "O horário foi desbloqueado com sucesso.",
+          className: "bg-blue-50 border-blue-200",
         });
         loadTimeBlocks();
       }
