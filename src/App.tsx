@@ -17,6 +17,7 @@ import DashboardLayout from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
 import TimeBlocks from "./pages/TimeBlocks";
 import FinancialSettings from "./pages/FinancialSettings";
+import Appointments from "./pages/Appointments";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
+            <Route path="appointments" element={<Appointments />} />
             <Route path="salon" element={<SalonManagement />} />
             <Route path="professionals" element={<ProfessionalsManagement />} />
             <Route path="professionals/new" element={<ProfessionalForm />} />

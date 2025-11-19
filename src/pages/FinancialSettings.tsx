@@ -13,10 +13,15 @@ import { sessionManager } from "@/lib/session";
 
 interface FinancialData {
   enablePayment: boolean;
+  bankCode: string;
   bankName: string;
   accountType: string;
   agencyNumber: string;
+  agencyDigit: string;
   accountNumber: string;
+  accountDigit: string;
+  accountHolderName: string;
+  accountHolderCPF: string;
   pixKey: string;
   pixKeyType: string;
   additionalInfo: string;
@@ -27,10 +32,15 @@ const FinancialSettings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FinancialData>({
     enablePayment: false,
+    bankCode: "",
     bankName: "",
     accountType: "corrente",
     agencyNumber: "",
+    agencyDigit: "",
     accountNumber: "",
+    accountDigit: "",
+    accountHolderName: "",
+    accountHolderCPF: "",
     pixKey: "",
     pixKeyType: "cpf",
     additionalInfo: "",
@@ -69,6 +79,7 @@ const FinancialSettings = () => {
         toast({
           title: "Dados salvos com sucesso!",
           description: "As configurações financeiras foram atualizadas.",
+          className: "bg-blue-50 border-blue-200",
         });
       } else {
         throw new Error(response.error || "Erro ao salvar");
@@ -129,6 +140,16 @@ const FinancialSettings = () => {
           <CardContent className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
+                <Label htmlFor="bankCode">Código do Banco</Label>
+                <Input
+                  id="bankCode"
+                  value={formData.bankCode}
+                  onChange={(e) => handleInputChange("bankCode", e.target.value)}
+                  placeholder="Ex: 001, 237, 341"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="bankName">Nome do Banco</Label>
                 <Input
                   id="bankName"
@@ -152,7 +173,29 @@ const FinancialSettings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="agencyNumber">Número da Agência</Label>
+                <Label htmlFor="accountHolderName">Nome do Titular</Label>
+                <Input
+                  id="accountHolderName"
+                  value={formData.accountHolderName}
+                  onChange={(e) => handleInputChange("accountHolderName", e.target.value)}
+                  placeholder="Nome completo do titular"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="accountHolderCPF">CPF do Titular</Label>
+                <Input
+                  id="accountHolderCPF"
+                  value={formData.accountHolderCPF}
+                  onChange={(e) => handleInputChange("accountHolderCPF", e.target.value)}
+                  placeholder="000.000.000-00"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label htmlFor="agencyNumber">Agência</Label>
                 <Input
                   id="agencyNumber"
                   value={formData.agencyNumber}
@@ -162,12 +205,38 @@ const FinancialSettings = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="agencyDigit">Dígito da Agência</Label>
+                <Input
+                  id="agencyDigit"
+                  value={formData.agencyDigit}
+                  onChange={(e) => handleInputChange("agencyDigit", e.target.value)}
+                  placeholder="0"
+                  maxLength={1}
+                />
+              </div>
+
+              <div className="space-y-2"></div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
                 <Label htmlFor="accountNumber">Número da Conta</Label>
                 <Input
                   id="accountNumber"
                   value={formData.accountNumber}
                   onChange={(e) => handleInputChange("accountNumber", e.target.value)}
-                  placeholder="00000-0"
+                  placeholder="00000"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="accountDigit">Dígito da Conta</Label>
+                <Input
+                  id="accountDigit"
+                  value={formData.accountDigit}
+                  onChange={(e) => handleInputChange("accountDigit", e.target.value)}
+                  placeholder="0"
+                  maxLength={2}
                 />
               </div>
             </div>

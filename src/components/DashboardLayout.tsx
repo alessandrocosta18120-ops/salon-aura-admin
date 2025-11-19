@@ -28,7 +28,8 @@ import { NavLink } from "react-router-dom";
 import { salonApi } from "@/lib/api";
 
 const menuItems = [
-  { title: "Agendamento Hoje", url: "/dashboard", icon: CalendarDays },
+  { title: "Início", url: "/dashboard", icon: Building2 },
+  { title: "Gestão de Agendamentos", url: "/dashboard/appointments", icon: CalendarDays },
   { title: "Configurar Salão", url: "/dashboard/salon", icon: Store },
   { title: "Gerenciar Profissionais", url: "/dashboard/professionals", icon: Users },
   { title: "Cadastrar Serviços", url: "/dashboard/services", icon: Scissors },

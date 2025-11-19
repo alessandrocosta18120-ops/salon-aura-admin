@@ -102,6 +102,8 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
+  const [editingFixedClient, setEditingFixedClient] = useState<FixedClient | null>(null);
+
   const loadData = async () => {
     setIsLoading(true);
     try {
