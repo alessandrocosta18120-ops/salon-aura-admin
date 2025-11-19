@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, MapPin, Phone, Instagram, Facebook, Youtube, Video, Upload, Calendar, X } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
-import { salonApi, holidayApi } from "@/lib/api";
+import { salonApi, holidayApi, professionalApi } from "@/lib/api";
 import { sessionManager } from "@/lib/session";
 
 interface SalonData {
@@ -36,13 +36,19 @@ interface SalonData {
   evadedClientsReminderText: string;
 }
 
+interface Professional {
+  id: string;
+  name: string;
+}
+
 interface Holiday {
   id?: string;
   name: string;
   date: string;
-  type: 'municipal' | 'blocked';
+  type: 'nacional' | 'estadual' | 'municipal' | 'blocked';
   isRecurring?: boolean;
   professionalId?: string;
+  professionalName?: string;
 }
 
 interface Theme {
@@ -69,10 +75,13 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [themes, setThemes] = useState<Theme[]>([]);
+  const [nationalHolidays, setNationalHolidays] = useState<Holiday[]>([]);
+  const [stateHolidays, setStateHolidays] = useState<Holiday[]>([]);
   const [municipalHolidays, setMunicipalHolidays] = useState<Holiday[]>([]);
   const [blockedDates, setBlockedDates] = useState<Holiday[]>([]);
-  const [newHoliday, setNewHoliday] = useState({ name: '', date: '', isRecurring: false, professionalId: '' });
+  const [newHoliday, setNewHoliday] = useState({ name: '', date: '', isRecurring: false, professionalId: '', category: 'municipal' as 'nacional' | 'estadual' | 'municipal' });
   const [newBlockedDate, setNewBlockedDate] = useState({ name: '', date: '', professionalId: '' });
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
   
   const [salonData, setSalonData] = useState<SalonData>({
     name: "",
@@ -102,6 +111,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     loadSalonData();
     loadThemes();
     loadHolidays();
+    loadProfessionals();
   }, []);
 
   const loadSalonData = async () => {
@@ -129,6 +139,17 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
       }
     } catch (error) {
       console.error('Error loading themes:', error);
+    }
+  };
+
+  const loadProfessionals = async () => {
+    try {
+      const response = await professionalApi.get();
+      if (response.success && response.data) {
+        setProfessionals(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading professionals:', error);
     }
   };
 
@@ -212,7 +233,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
           className: "bg-blue-50 border-blue-200",
         });
         if (type === 'municipal') {
-          setNewHoliday({ name: '', date: '', isRecurring: false, professionalId: '' });
+          setNewHoliday({ name: '', date: '', isRecurring: false, professionalId: '', category: 'municipal' });
         } else {
           setNewBlockedDate({ name: '', date: '', professionalId: '' });
         }
