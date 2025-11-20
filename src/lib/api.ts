@@ -129,9 +129,9 @@ export const authApi = {
 
 // Holiday APIs
 export const holidayApi = {
-  getMunicipal: () => apiCall('getadmmunicipalidays'),
-  setMunicipal: (data: any) => apiCall('setadmmunicipalidays', data, 'POST'),
-  deleteMunicipal: (id: string) => apiCall('deleteadmmunicipalholiday', { id }, 'POST'),
+  get: () => apiCall('getadmholidays'),
+  set: (data: any) => apiCall('setadmholidays', data, 'POST'),
+  delete: (id: string) => apiCall('deleteadmholiday', { id }, 'POST'),
   getBlocked: () => apiCall('getadmblockeddates'),
   setBlocked: (data: any) => apiCall('setadmblockeddates', data, 'POST'),
   deleteBlocked: (id: string) => apiCall('deleteadmblockedday', { id }, 'POST'),

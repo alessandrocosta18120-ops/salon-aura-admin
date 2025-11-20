@@ -155,13 +155,20 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
 
   const loadHolidays = async () => {
     try {
-      const [municipalResponse, blockedResponse] = await Promise.all([
-        holidayApi.getMunicipal(),
+      const [holidaysResponse, blockedResponse] = await Promise.all([
+        holidayApi.get(),
         holidayApi.getBlocked()
       ]);
       
-      if (municipalResponse.success) {
-        setMunicipalHolidays(municipalResponse.data || []);
+      if (holidaysResponse.success && holidaysResponse.data) {
+        // Separate holidays by type
+        const national = holidaysResponse.data.filter((h: Holiday) => h.type === 'nacional');
+        const state = holidaysResponse.data.filter((h: Holiday) => h.type === 'estadual');
+        const municipal = holidaysResponse.data.filter((h: Holiday) => h.type === 'municipal');
+        
+        setNationalHolidays(national);
+        setStateHolidays(state);
+        setMunicipalHolidays(municipal);
       }
       if (blockedResponse.success) {
         setBlockedDates(blockedResponse.data || []);
@@ -199,8 +206,8 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     }));
   };
 
-  const handleAddHoliday = async (type: 'municipal' | 'blocked') => {
-    const holiday = type === 'municipal' ? newHoliday : newBlockedDate;
+  const handleAddHoliday = async (type: 'holiday' | 'blocked') => {
+    const holiday = type === 'holiday' ? newHoliday : newBlockedDate;
     
     if (!holiday.name || !holiday.date) {
       toast({
@@ -215,7 +222,8 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
       const userId = sessionManager.getUserId();
       const salonId = sessionManager.getSalonId();
       const slug = sessionManager.getSlug();
-      const dataToSend = { 
+      
+      let dataToSend: any = { 
         ...holiday, 
         userId, 
         salonId, 
@@ -223,7 +231,12 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
         professionalId: holiday.professionalId || null 
       };
       
-      const api = type === 'municipal' ? holidayApi.setMunicipal : holidayApi.setBlocked;
+      // Add type/category for holidays
+      if (type === 'holiday' && 'category' in holiday) {
+        dataToSend.type = holiday.category;
+      }
+      
+      const api = type === 'holiday' ? holidayApi.set : holidayApi.setBlocked;
       const response = await api(dataToSend);
       
       if (response.success) {
@@ -232,7 +245,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
           description: `${holiday.name} foi adicionado com sucesso.`,
           className: "bg-blue-50 border-blue-200",
         });
-        if (type === 'municipal') {
+        if (type === 'holiday') {
           setNewHoliday({ name: '', date: '', isRecurring: false, professionalId: '', category: 'municipal' });
         } else {
           setNewBlockedDate({ name: '', date: '', professionalId: '' });
@@ -248,13 +261,13 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     }
   };
 
-  const handleRemoveHoliday = async (id: string, type: 'municipal' | 'blocked') => {
+  const handleRemoveHoliday = async (id: string, type: 'holiday' | 'blocked') => {
     if (!window.confirm('TEM CERTEZA QUE DESEJA APAGAR O ITEM SELECIONADO?')) {
       return;
     }
 
     try {
-      const api = type === 'municipal' ? holidayApi.deleteMunicipal : holidayApi.deleteBlocked;
+      const api = type === 'holiday' ? holidayApi.delete : holidayApi.deleteBlocked;
       const response = await api(id);
       
       if (response.success) {
@@ -532,7 +545,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                     Feriado Recorrente (todos os anos)
                   </Label>
                 </div>
-                <Button onClick={() => handleAddHoliday('municipal')} className="w-full">
+                <Button onClick={() => handleAddHoliday('holiday')} className="w-full">
                   Adicionar Feriado Municipal
                 </Button>
               </div>
@@ -547,7 +560,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleRemoveHoliday(holiday.id!, 'municipal')}
+                      onClick={() => handleRemoveHoliday(holiday.id!, 'holiday')}
                     >
                       <X className="h-4 w-4" />
                     </Button>

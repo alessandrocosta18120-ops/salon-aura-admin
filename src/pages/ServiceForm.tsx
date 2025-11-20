@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { X } from "lucide-react";
+import { MaskedInput } from "@/components/ui/masked-input";
+import { currencyMask, formatCurrency } from "@/lib/masks";
 import { serviceApi, professionalApi } from "@/lib/api";
 import { serviceSchema, getValidationErrorMessage } from "@/lib/validation";
 import { PageHeader } from "@/components/PageHeader";
@@ -238,14 +240,12 @@ const ServiceForm = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="price">Preço (R$) *</Label>
-                <Input
+                <MaskedInput
                   id="price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange("price", parseFloat(e.target.value) || 0)}
-                  placeholder="50.00"
+                  mask={currencyMask}
+                  value={formData.price.toString()}
+                  onChange={(value) => handleInputChange("price", formatCurrency(value))}
+                  placeholder="R$ 0,00"
                   required
                 />
               </div>

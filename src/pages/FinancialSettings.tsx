@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { DollarSign, CreditCard, Building } from "lucide-react";
+import { MaskedInput } from "@/components/ui/masked-input";
+import { cpfMask, bankAccountMask, bankAgencyMask } from "@/lib/masks";
 import { settingsApi } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { sessionManager } from "@/lib/session";
