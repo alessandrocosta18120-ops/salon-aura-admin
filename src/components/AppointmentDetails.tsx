@@ -42,9 +42,14 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
     try {
       const response = await appointmentApi.getByDate(format(date, 'yyyy-MM-dd'));
       if (response.success) {
+        // Always update with response data, even if empty
         setAppointments(response.data || []);
+      } else {
+        // If API returns error, clear appointments
+        setAppointments([]);
       }
     } catch (error) {
+      setAppointments([]);
       toast({
         title: "Erro ao carregar agendamentos",
         description: "Não foi possível carregar os agendamentos.",
@@ -206,10 +211,6 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
                   />
                 </PopoverContent>
               </Popover>
-              
-              <Button variant="outline" onClick={() => setSelectedDate(new Date())}>
-                Hoje
-              </Button>
             </div>
 
             <Button variant="outline" size="icon" onClick={handleNextDay}>

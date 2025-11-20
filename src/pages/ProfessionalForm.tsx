@@ -9,6 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { X, Upload } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
+import { MaskedInput } from "@/components/ui/masked-input";
+import { phoneMask, emailValidation } from "@/lib/masks";
 import { professionalApi } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { sessionManager } from "@/lib/session";
@@ -229,10 +231,11 @@ const ProfessionalForm = () => {
 
             <div className="space-y-2">
               <Label htmlFor="phone">Telefone/WhatsApp *</Label>
-              <Input
+              <MaskedInput
                 id="phone"
+                mask={phoneMask}
                 value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
+                onChange={(value) => handleInputChange("phone", value)}
                 placeholder="(11) 99999-9999"
                 required
               />
