@@ -546,26 +546,98 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                   </Label>
                 </div>
                 <Button onClick={() => handleAddHoliday('holiday')} className="w-full">
-                  Adicionar Feriado Municipal
+                  Cadastrar Feriado
                 </Button>
               </div>
               
-              <div className="space-y-2">
-                {municipalHolidays.map((holiday) => (
-                  <div key={holiday.id} className="flex items-center justify-between p-2 border rounded">
-                    <div>
-                      <p className="font-medium">{holiday.name}</p>
-                      <p className="text-sm text-muted-foreground">{holiday.date}</p>
+              {/* National Holidays */}
+              <div className="space-y-4 mt-6">
+                <h4 className="font-medium">Feriados Nacionais</h4>
+                <div className="space-y-2">
+                  {nationalHolidays.map((holiday) => (
+                    <div key={holiday.id} className="flex items-center justify-between p-2 border rounded">
+                      <div>
+                        <p className="font-medium">{holiday.name}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(holiday.date).toLocaleDateString('pt-BR')}</p>
+                        {holiday.professionalId && (
+                          <p className="text-xs text-muted-foreground">
+                            Profissional: {professionals.find(p => p.id === holiday.professionalId)?.name || 'Desconhecido'}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveHoliday(holiday.id!, 'holiday')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveHoliday(holiday.id!, 'holiday')}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                  ))}
+                  {nationalHolidays.length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">Nenhum feriado nacional cadastrado</p>
+                  )}
+                </div>
+              </div>
+
+              {/* State Holidays */}
+              <div className="space-y-4">
+                <h4 className="font-medium">Feriados Estaduais</h4>
+                <div className="space-y-2">
+                  {stateHolidays.map((holiday) => (
+                    <div key={holiday.id} className="flex items-center justify-between p-2 border rounded">
+                      <div>
+                        <p className="font-medium">{holiday.name}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(holiday.date).toLocaleDateString('pt-BR')}</p>
+                        {holiday.professionalId && (
+                          <p className="text-xs text-muted-foreground">
+                            Profissional: {professionals.find(p => p.id === holiday.professionalId)?.name || 'Desconhecido'}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveHoliday(holiday.id!, 'holiday')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {stateHolidays.length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">Nenhum feriado estadual cadastrado</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Municipal Holidays */}
+              <div className="space-y-4">
+                <h4 className="font-medium">Feriados Municipais</h4>
+                <div className="space-y-2">
+                  {municipalHolidays.map((holiday) => (
+                    <div key={holiday.id} className="flex items-center justify-between p-2 border rounded">
+                      <div>
+                        <p className="font-medium">{holiday.name}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(holiday.date).toLocaleDateString('pt-BR')}</p>
+                        {holiday.professionalId && (
+                          <p className="text-xs text-muted-foreground">
+                            Profissional: {professionals.find(p => p.id === holiday.professionalId)?.name || 'Desconhecido'}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveHoliday(holiday.id!, 'holiday')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {municipalHolidays.length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">Nenhum feriado municipal cadastrado</p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -610,7 +682,12 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                   <div key={date.id} className="flex items-center justify-between p-2 border rounded">
                     <div>
                       <p className="font-medium">{date.name}</p>
-                      <p className="text-sm text-muted-foreground">{date.date}</p>
+                      <p className="text-sm text-muted-foreground">{new Date(date.date).toLocaleDateString('pt-BR')}</p>
+                      {date.professionalId && (
+                        <p className="text-xs text-muted-foreground">
+                          Profissional: {professionals.find(p => p.id === date.professionalId)?.name || 'Desconhecido'}
+                        </p>
+                      )}
                     </div>
                     <Button
                       variant="ghost"
@@ -621,6 +698,9 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                     </Button>
                   </div>
                 ))}
+                {blockedDates.length === 0 && (
+                  <p className="text-center text-muted-foreground py-4">Nenhuma data bloqueada</p>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -281,7 +281,7 @@ const TimeBlocks = () => {
                   key={block.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex-1">
+                   <div className="flex-1">
                     <div className="font-medium">{getProfessionalName(block.professionalId)}</div>
                     <div className="text-sm text-muted-foreground">
                       {new Date(block.date).toLocaleDateString('pt-BR')} • {block.startTime} - {block.endTime}

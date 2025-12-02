@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, Phone, MessageSquare } from "lucide-react";
+import { ArrowLeft, Users, Phone, MessageSquare, X } from "lucide-react";
 import { clientApi, professionalApi, serviceApi } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { sessionManager } from "@/lib/session";
@@ -104,6 +104,56 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
 
   const [editingFixedClient, setEditingFixedClient] = useState<FixedClient | null>(null);
 
+  const handleEditFixedClient = (client: FixedClient) => {
+    setEditingFixedClient(client);
+    setNewFixedClient({
+      name: client.name,
+      phone: client.phone,
+      frequency: client.frequency,
+      weekDay: client.weekDay,
+      time: client.time,
+      professionalId: client.professionalId,
+      serviceId: client.serviceId
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingFixedClient(null);
+    setNewFixedClient({
+      name: '',
+      phone: '',
+      frequency: 'semanal',
+      weekDay: '',
+      time: '',
+      professionalId: '',
+      serviceId: ''
+    });
+  };
+
+  const handleDeleteFixedClient = async (id: string) => {
+    if (!window.confirm('TEM CERTEZA QUE DESEJA APAGAR O CLIENTE FIXO SELECIONADO?')) {
+      return;
+    }
+
+    try {
+      const response = await clientApi.deleteFixed(id);
+      if (response.success) {
+        toast({
+          title: "Cliente fixo apagado!",
+          description: "O cliente foi removido dos agendamentos automáticos.",
+          className: "bg-blue-50 border-blue-200",
+        });
+        loadData();
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao apagar",
+        description: "Não foi possível apagar o cliente fixo.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -147,29 +197,28 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
     try {
       const userId = sessionManager.getSessionId();
       const salonId = sessionManager.getSalonId();
-      const dataToSend = { ...newFixedClient, userId, salonId };
+      const dataToSend: any = { ...newFixedClient, userId, salonId };
+      
+      if (editingFixedClient) {
+        dataToSend.id = editingFixedClient.id;
+      }
       
       const response = await clientApi.setFixed(dataToSend);
       if (response.success) {
         toast({
-          title: "Cliente fixo cadastrado!",
-          description: "Cliente foi adicionado aos agendamentos automáticos.",
+          title: editingFixedClient ? "Cliente fixo atualizado!" : "Cliente fixo cadastrado!",
+          description: editingFixedClient 
+            ? "Agendamento automático atualizado com sucesso."
+            : "Cliente foi adicionado aos agendamentos automáticos.",
+          className: "bg-blue-50 border-blue-200",
         });
-        setNewFixedClient({
-          name: '',
-          phone: '',
-          frequency: 'semanal',
-          weekDay: '',
-          time: '',
-          professionalId: '',
-          serviceId: ''
-        });
+        handleCancelEdit();
         loadData();
       }
     } catch (error) {
       toast({
-        title: "Erro ao cadastrar",
-        description: "Não foi possível cadastrar o cliente fixo.",
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o cliente fixo.",
         variant: "destructive",
       });
     }
@@ -405,7 +454,7 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Cadastrar Cliente Fixo</CardTitle>
+              <CardTitle>{editingFixedClient ? 'Editar Cliente Fixo' : 'Cadastrar Cliente Fixo'}</CardTitle>
               <CardDescription>
                 Cliente será agendado automaticamente na frequência configurada
               </CardDescription>
@@ -525,9 +574,16 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
                 </div>
               </div>
 
-              <Button onClick={handleAddFixedClient} className="w-full">
-                Cadastrar Cliente Fixo
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={handleAddFixedClient} className="flex-1">
+                  {editingFixedClient ? 'Atualizar Cliente Fixo' : 'Cadastrar Cliente Fixo'}
+                </Button>
+                {editingFixedClient && (
+                  <Button onClick={handleCancelEdit} variant="outline">
+                    Cancelar
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -538,16 +594,32 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
             <CardContent>
               <div className="space-y-2">
                 {fixedClients.map((client) => (
-                  <div key={client.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
+                  <div key={client.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border rounded-lg">
+                    <div className="flex-1">
                       <p className="font-medium">{client.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {client.frequency} - {weekDays.find(d => d.value === client.weekDay)?.label} às {client.time}
                       </p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <Phone className="h-3 w-3" />
+                        <span>{client.phone}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{client.phone}</span>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleEditFixedClient(client)}
+                      >
+                        Alterar
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        onClick={() => handleDeleteFixedClient(client.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
