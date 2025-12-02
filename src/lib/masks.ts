@@ -1,24 +1,34 @@
 // Input mask utilities for Brazilian formats
 
 export const phoneMask = (value: string): string => {
-  const numbers = value.replace(/\D/g, '');
+  const numbers = value.replace(/\D/g, '').substring(0, 11);
   if (numbers.length <= 10) {
-    return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    return numbers.replace(/(\d{2})(\d{0,4})(\d{0,4})/, (match, p1, p2, p3) => {
+      if (p3) return `(${p1}) ${p2}-${p3}`;
+      if (p2) return `(${p1}) ${p2}`;
+      if (p1) return `(${p1}`;
+      return '';
+    });
   }
-  return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  return numbers.replace(/(\d{2})(\d{0,5})(\d{0,4})/, (match, p1, p2, p3) => {
+    if (p3) return `(${p1}) ${p2}-${p3}`;
+    if (p2) return `(${p1}) ${p2}`;
+    if (p1) return `(${p1}`;
+    return '';
+  });
 };
 
 export const cpfMask = (value: string): string => {
-  return value
-    .replace(/\D/g, '')
+  const numbers = value.replace(/\D/g, '').substring(0, 11);
+  return numbers
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 };
 
 export const cnpjMask = (value: string): string => {
-  return value
-    .replace(/\D/g, '')
+  const numbers = value.replace(/\D/g, '').substring(0, 14);
+  return numbers
     .replace(/(\d{2})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d)/, '$1/$2')
@@ -44,9 +54,11 @@ export const emailValidation = (email: string): boolean => {
 };
 
 export const bankAccountMask = (value: string): string => {
-  return value.replace(/\D/g, '').replace(/(\d)(\d{1})$/, '$1-$2');
+  const numbers = value.replace(/\D/g, '').substring(0, 13);
+  return numbers.replace(/(\d)(\d{1})$/, '$1-$2');
 };
 
 export const bankAgencyMask = (value: string): string => {
-  return value.replace(/\D/g, '').replace(/(\d)(\d{1})$/, '$1-$2');
+  const numbers = value.replace(/\D/g, '').substring(0, 5);
+  return numbers.replace(/(\d)(\d{1})$/, '$1-$2');
 };

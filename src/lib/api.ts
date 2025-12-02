@@ -102,6 +102,7 @@ export const clientApi = {
   get: () => apiCall('getadmclients'),
   getFixed: () => apiCall('getadmfixedclients'),
   setFixed: (data: any) => apiCall('setadmfixedclients', data, 'POST'),
+  deleteFixed: (id: string) => apiCall('deleteadmfixedclient', { id }, 'POST'),
   getChurned: () => apiCall('getadmchurnedclients'),
   sendReminder: (data: any) => apiCall('sendclientreminder', data, 'POST'),
   sendBroadcast: (data: any) => apiCall('sendclientbroadcast', data, 'POST'),

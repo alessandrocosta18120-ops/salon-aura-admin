@@ -114,7 +114,10 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
 
   const handleWhatsAppClick = async (appointment: Appointment) => {
     const message = `Olá ${appointment.clientName}! Confirmando seu agendamento para ${format(selectedDate, "dd/MM/yyyy", { locale: ptBR })} às ${appointment.time} com ${appointment.professionalName} - ${appointment.serviceName}.`;
-    const whatsappUrl = `https://wa.me/${appointment.clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    // Format phone: remove all non-digits, then add country code
+    const phoneDigits = appointment.clientPhone.replace(/\D/g, '');
+    const whatsappPhone = `55${phoneDigits}`;
+    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank');
     

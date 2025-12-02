@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { MessageSquare, Check } from "lucide-react";
-import { appointmentApi, settingsApi } from "@/lib/api";
+import { appointmentApi } from "@/lib/api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { PageHeader } from "@/components/PageHeader";
@@ -26,11 +26,9 @@ export const AppointmentReminders = ({ selectedDate, onBack }: { selectedDate: D
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [remindersSent, setRemindersSent] = useState<Set<string>>(new Set());
-  const [defaultMessage, setDefaultMessage] = useState("");
 
   useEffect(() => {
     loadAppointments();
-    loadDefaultMessage();
   }, [selectedDate]);
 
   const loadAppointments = async () => {
@@ -51,37 +49,47 @@ export const AppointmentReminders = ({ selectedDate, onBack }: { selectedDate: D
     }
   };
 
-  const loadDefaultMessage = async () => {
-    try {
-      const response = await settingsApi.get();
-      if (response.success && response.data?.confirmationMessage) {
-        setDefaultMessage(response.data.confirmationMessage);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar mensagem padrão:", error);
+  // Group appointments by professional
+  const groupedByProfessional = appointments.reduce((acc, appointment) => {
+    const key = appointment.professionalName;
+    if (!acc[key]) {
+      acc[key] = {
+        professionalName: appointment.professionalName,
+        professionalPhone: appointment.professionalPhone,
+        appointments: []
+      };
     }
-  };
+    acc[key].appointments.push(appointment);
+    return acc;
+  }, {} as Record<string, { professionalName: string; professionalPhone: string; appointments: Appointment[] }>);
 
-  const handleSendReminder = (appointment: Appointment) => {
-    const message = defaultMessage
-      .replace("{clientName}", appointment.clientName)
-      .replace("{serviceName}", appointment.serviceName)
-      .replace("{time}", appointment.time)
-      .replace("{date}", format(selectedDate, "dd/MM/yyyy", { locale: ptBR }))
-      .replace("{professionalName}", appointment.professionalName);
-
+  const handleSendReminder = (professionalName: string, professionalPhone: string, appointments: Appointment[]) => {
+    const appointmentsList = appointments
+      .map(apt => `• ${apt.time} - ${apt.clientName} - ${apt.serviceName}`)
+      .join('\n');
+    
+    const message = `Olá ${professionalName}!\n\nLembretes de agendamentos para ${format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}:\n\n${appointmentsList}\n\nBom trabalho!`;
+    
+    // Format phone: remove all non-digits, then add country code
+    const phoneDigits = professionalPhone.replace(/\D/g, '');
+    const whatsappPhone = `55${phoneDigits}`;
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${appointment.professionalPhone.replace(/\D/g, '')}?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodedMessage}`;
     
     // Open WhatsApp
     window.open(whatsappUrl, '_blank');
     
-    // Mark as sent
-    setRemindersSent(prev => new Set(prev).add(appointment.id));
+    // Mark all appointments as sent
+    setRemindersSent(prev => {
+      const newSet = new Set(prev);
+      appointments.forEach(apt => newSet.add(apt.id));
+      return newSet;
+    });
     
     toast({
       title: "Lembrete enviado",
-      description: `Lembrete enviado para ${appointment.professionalName}`,
+      description: `Lembrete enviado para ${professionalName} com ${appointments.length} agendamento(s)`,
+      className: "bg-blue-50 border-blue-200",
     });
   };
 
@@ -120,9 +128,9 @@ export const AppointmentReminders = ({ selectedDate, onBack }: { selectedDate: D
 
       <Card>
         <CardHeader>
-          <CardTitle>Agendamentos</CardTitle>
+          <CardTitle>Agendamentos por Profissional</CardTitle>
           <CardDescription>
-            Clique em "Enviar Lembrete" para notificar o profissional via WhatsApp
+            Clique em "Enviar Lembrete" para notificar o profissional via WhatsApp com todos os agendamentos do dia
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -133,38 +141,26 @@ export const AppointmentReminders = ({ selectedDate, onBack }: { selectedDate: D
               Nenhum agendamento encontrado para esta data.
             </p>
           ) : (
-            <div className="space-y-4">
-              {appointments.map((appointment) => {
-                const reminderSent = remindersSent.has(appointment.id);
+            <div className="space-y-6">
+              {Object.entries(groupedByProfessional).map(([professionalName, data]) => {
+                const allSent = data.appointments.every(apt => remindersSent.has(apt.id));
                 
                 return (
-                  <Card key={appointment.id} className="border-l-4 border-l-primary">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-lg">{appointment.time}</span>
-                            <Badge className={getStatusColor(appointment.status)}>
-                              {getStatusText(appointment.status)}
-                            </Badge>
-                          </div>
-                          
-                          <div className="space-y-1 text-sm">
-                            <p><span className="font-medium">Cliente:</span> {appointment.clientName}</p>
-                            <p><span className="font-medium">Telefone Cliente:</span> {appointment.clientPhone}</p>
-                            <p><span className="font-medium">Profissional:</span> {appointment.professionalName}</p>
-                            <p><span className="font-medium">Serviço:</span> {appointment.serviceName}</p>
-                            <p><span className="font-medium">Duração:</span> {appointment.duration} minutos</p>
-                          </div>
+                  <Card key={professionalName} className="border-l-4 border-l-primary">
+                    <CardHeader>
+                      <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                          <CardTitle>{data.professionalName}</CardTitle>
+                          <CardDescription>
+                            {data.appointments.length} agendamento(s) • {data.professionalPhone}
+                          </CardDescription>
                         </div>
-                        
                         <Button
-                          onClick={() => handleSendReminder(appointment)}
-                          disabled={reminderSent}
-                          variant={reminderSent ? "secondary" : "default"}
-                          className="shrink-0"
+                          onClick={() => handleSendReminder(data.professionalName, data.professionalPhone, data.appointments)}
+                          disabled={allSent}
+                          variant={allSent ? "secondary" : "default"}
                         >
-                          {reminderSent ? (
+                          {allSent ? (
                             <>
                               <Check className="mr-2 h-4 w-4" />
                               Lembrete Enviado
@@ -176,6 +172,24 @@ export const AppointmentReminders = ({ selectedDate, onBack }: { selectedDate: D
                             </>
                           )}
                         </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {data.appointments.map((appointment) => (
+                          <div key={appointment.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold">{appointment.time}</span>
+                              <Badge className={getStatusColor(appointment.status)}>
+                                {getStatusText(appointment.status)}
+                              </Badge>
+                            </div>
+                            <div className="text-sm sm:text-right">
+                              <p className="font-medium">{appointment.clientName}</p>
+                              <p className="text-muted-foreground">{appointment.serviceName} • {appointment.duration}min</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
