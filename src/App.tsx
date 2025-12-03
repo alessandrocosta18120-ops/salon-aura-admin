@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import TimeBlocks from "./pages/TimeBlocks";
 import FinancialSettings from "./pages/FinancialSettings";
 import Appointments from "./pages/Appointments";
+import UsersManagement from "./pages/UsersManagement";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="time-blocks" element={<TimeBlocks />} />
             <Route path="financial" element={<FinancialSettings />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="users" element={<UsersManagement />} />
           </Route>
           <Route path="/" element={<Login />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

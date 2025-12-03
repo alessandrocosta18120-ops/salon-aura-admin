@@ -1,12 +1,12 @@
-# Plano de Implementação - 02/12/2024
+# Plano de Implementação - 02/12/2024 (Atualizado 03/12/2024)
 
 ## Resumo das Alterações
 
-Este documento detalha todas as mudanças implementadas no sistema em 02/12/2024, incluindo correções de bugs, melhorias de UX e implementação de novas funcionalidades.
+Este documento detalha todas as mudanças implementadas no sistema, incluindo correções de bugs, melhorias de UX e implementação de novas funcionalidades.
 
 ---
 
-## 1. Correção dos Dias da Semana (Profissionais)
+## 1. Correção dos Dias da Semana (Profissionais) ✅ CONCLUÍDO
 
 ### Frontend
 **Arquivo:** `src/pages/ProfessionalForm.tsx`
@@ -35,102 +35,116 @@ Este documento detalha todas as mudanças implementadas no sistema em 02/12/2024
 
 ---
 
-## 2. Sistema de Perfis de Usuário
+## 2. Sistema de Perfis de Usuário ✅ CONCLUÍDO
 
 ### Frontend
-**Novos Componentes:**
-- Sistema de controle de acesso baseado em roles (Admin, Manager, Staff)
-- UI para gerenciamento de perfis de usuários (apenas Admin)
+**Arquivos Criados:**
+- `src/hooks/useUserRole.ts` - Hook para gerenciar role do usuário
+- `src/pages/UsersManagement.tsx` - Tela de gerenciamento de usuários (apenas Admin)
+- `src/components/ui/pagination-controls.tsx` - Controles de paginação reutilizáveis
+- `src/components/ui/sort-controls.tsx` - Controles de ordenação reutilizáveis
 
-**Arquivos a Criar:**
-- `src/pages/UserManagement.tsx` - Gerenciamento de usuários
-- `src/lib/roles.ts` - Utilitários de verificação de roles
-- `src/hooks/useUserRole.ts` - Hook para acessar role do usuário atual
+**Arquivos Modificados:**
+- `src/lib/session.ts` - Adicionado campo `role` na sessão
+- `src/components/DashboardLayout.tsx` - Menu filtrado por role + badge de role do usuário
+- `src/App.tsx` - Adicionada rota `/dashboard/users`
 
-### Backend
-**Novas APIs Necessárias:**
+### Implementação de Roles
+**Três níveis de acesso implementados:**
 
-1. **admin_getuserroles.asp**
-   - GET: Retorna roles de todos os usuários (apenas Admin)
-   - Parâmetros: salonId
-   - Retorno: Lista de users com seus roles
+| Menu | Admin | Manager | Staff |
+|------|-------|---------|-------|
+| Início | ✅ | ✅ | ✅ |
+| Gestão de Agendamentos | ✅ | ✅ | ✅ |
+| Configurar Salão | ✅ | ✅ | ❌ |
+| Gerenciar Profissionais | ✅ | ✅ | ❌ |
+| Cadastrar Serviços | ✅ | ✅ | ❌ |
+| Administrar Clientes | ✅ | ✅ | ❌ |
+| Bloqueios de Horários | ✅ | ✅ | ✅ |
+| Financeiro | ✅ | ✅ | ❌ |
+| Configurações | ✅ | ✅ | ❌ |
+| Gerenciar Usuários | ✅ | ❌ | ❌ |
 
-2. **admin_setuserrole.asp**
-   - POST: Atribui/atualiza role de um usuário (apenas Admin)
-   - Parâmetros: userId, role (admin/manager/staff), salonId
-   - Validações: Apenas Admin pode alterar roles
+### Backend - APIs Necessárias
 
-3. **admin_getcurrentuserrole.asp**
-   - GET: Retorna role do usuário atual
-   - Parâmetros: userId, salonId
-   - Retorno: { role: 'admin'|'manager'|'staff' }
-
-### Database
-**Tabelas Criadas (Supabase):**
-```sql
--- Enum para roles
-create type public.app_role as enum ('admin', 'manager', 'staff');
-
--- Tabela de roles
-create table public.user_roles (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade not null,
-  role app_role not null,
-  created_at timestamp with time zone default now(),
-  unique (user_id, role)
-);
-
--- Security definer function
-create or replace function public.has_role(_user_id uuid, _role app_role)
-returns boolean
-language sql stable security definer set search_path = public
-as $$
-  select exists (
-    select 1 from public.user_roles
-    where user_id = _user_id and role = _role
-  )
-$$;
+**1. admin_authlogin.asp (MODIFICAR)**
+- Adicionar campo `role` no retorno JSON
+```json
+{
+  "success": true,
+  "data": {
+    "sessionId": "xxx",
+    "salonId": "1",
+    "userId": "1",
+    "userName": "Admin",
+    "slug": "salon",
+    "role": "admin"
+  }
+}
 ```
 
-**Políticas RLS:**
-- Admins: acesso total
-- Usuários: podem ver apenas seus próprios roles
+**2. admin_getadmusers.asp (CRIAR)**
+- GET: Lista todos os usuários com seus roles
+- Parâmetros: salonId
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "name": "João Admin",
+      "email": "admin@email.com",
+      "role": "admin",
+      "active": true,
+      "createdAt": "2024-01-01"
+    }
+  ]
+}
+```
 
-### Regras de Acesso
-**Admin:**
-- Acesso total ao sistema
-- Gerenciar perfis de outros usuários
-- Todas as configurações e relatórios
+**3. admin_setadmuserrole.asp (CRIAR)**
+- POST: Atualiza role de um usuário (apenas Admin)
+- Body: `{"userId": "1", "role": "manager"}`
+- Validações: Verificar se usuário logado é Admin
 
-**Manager:**
-- Acesso a todos os menus exceto gerenciamento de perfis
-- Visualizar e editar agendamentos
-- Gerenciar clientes, serviços e profissionais
-- Não pode alterar roles de usuários
+**4. admin_deleteadmuser.asp (CRIAR)**
+- POST: Remove um usuário
+- Body: `{"id": "1"}`
+- Validações: Não permitir auto-exclusão
 
-**Staff:**
-- Acesso apenas ao próprio horário
-- Visualizar própria agenda
-- Editar dados pessoais
-- Sem acesso a configurações administrativas
+### Database (SQL Server)
+```sql
+-- Tabela de roles
+CREATE TABLE user_roles (
+    id INT PRIMARY KEY IDENTITY,
+    userId INT NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'manager', 'staff')),
+    createdAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (userId) REFERENCES users(id)
+);
+
+-- Índice para performance
+CREATE INDEX idx_user_roles_userId ON user_roles(userId);
+```
 
 ---
 
-## 3. Lembretes Agrupados por Profissional
+## 3. Lembretes Agrupados por Profissional ✅ CONCLUÍDO
 
 ### Frontend
 **Arquivo:** `src/components/AppointmentReminders.tsx`
 
 **Alterações:**
 - Agrupamento de agendamentos por profissional
-- Um único botão de envio por profissional
+- Um único botão de envio por profissional (não mais por agendamento)
 - Mensagem consolidada com todos os agendamentos do dia
+- Estado "Lembrete Enviado" por profissional
 
 **Formato da Mensagem:**
 ```
 Olá [Nome Profissional]!
 
-Lembretes de agendamentos para [data]:
+Lembretes de agendamentos para hoje:
 
 • [horário] - [Cliente] - [Serviço]
 • [horário] - [Cliente] - [Serviço]
@@ -144,34 +158,34 @@ Nenhuma alteração necessária - lógica implementada no frontend
 
 ---
 
-## 4. Máscaras de Input com Limitação de Caracteres
+## 4. Máscaras de Input com Limitação de Caracteres ✅ CONCLUÍDO
 
 ### Frontend
 **Arquivo:** `src/lib/masks.ts`
 
 **Alterações:**
-- `phoneMask`: Limita entrada a 11 dígitos (formato brasileiro)
-- `cpfMask`: Limita entrada a 11 dígitos
-- `cnpjMask`: Limita entrada a 14 dígitos
+- `phoneMask`: Formato (XX) XXXXX-XXXX, limitado a 11 dígitos
+- `cpfMask`: Formato XXX.XXX.XXX-XX, limitado a 11 dígitos
+- `cnpjMask`: Formato XX.XXX.XXX/XXXX-XX, limitado a 14 dígitos
 - `bankAccountMask`: Limita entrada a 13 dígitos
 - `bankAgencyMask`: Limita entrada a 5 dígitos
 
 **Implementação:**
-Todas as máscaras agora usam `.substring(0, maxLength)` para forçar o limite de caracteres e prevenir erros de digitação.
+Todas as máscaras usam `.substring(0, maxLength)` para forçar o limite de caracteres.
 
 ### Backend
-Nenhuma alteração necessária - validação client-side
+Recomendado validar no backend também para segurança adicional.
 
 ---
 
-## 5. Correção do Formato WhatsApp
+## 5. Correção do Formato WhatsApp ✅ CONCLUÍDO
 
 ### Frontend
 **Arquivo:** `src/components/AppointmentDetails.tsx`
 
 **Alteração:**
 ```javascript
-// Antes: +55197582-4433 (errado)
+// Antes: +55197582-4433 (errado - faltando DDD)
 // Depois: +5511975824433 (correto)
 
 const phoneDigits = phone.replace(/\D/g, '');
@@ -179,117 +193,36 @@ const whatsappPhone = `55${phoneDigits}`;
 ```
 
 **Lógica:**
-1. Remove todos os não-dígitos do telefone
+1. Remove todos os não-dígitos do telefone armazenado
 2. Adiciona código do país (55) no início
-3. Resultado: +5511975824433 (formato WhatsApp correto)
+3. Resultado correto para WhatsApp API
 
 ### Backend
 Nenhuma alteração necessária
 
 ---
 
-## 6. Gerenciamento de Clientes Fixos (CRUD Completo)
+## 6. Paginação e Ordenação de Clientes ✅ CONCLUÍDO
 
 ### Frontend
-**Arquivo:** `src/components/ClientsManagement.tsx`
+**Arquivos Criados:**
+- `src/components/ui/pagination-controls.tsx` - Componente de paginação
+- `src/components/ui/sort-controls.tsx` - Componente de ordenação
 
-**Alterações:**
-- Botão "Alterar" para cada cliente fixo
-- Botão "Apagar" com confirmação
-- Formulário reutilizado para edição
-- Estados de edição gerenciados corretamente
+**Arquivo Modificado:** `src/components/ClientsManagement.tsx`
 
-**Novas Funções:**
-- `handleEditFixedClient`: Carrega dados do cliente no formulário
-- `handleDeleteFixedClient`: Remove cliente fixo
-- `handleCancelEdit`: Cancela edição e limpa formulário
+**Funcionalidades Implementadas:**
+- Busca por nome ou telefone (filtro em tempo real)
+- Ordenação por Nome, Data ou Telefone (ascendente/descendente)
+- Paginação com 10, 25, 50 ou 100 itens por página
+- Contador de itens exibidos ("Exibindo 1-10 de 156")
+- Navegação: primeira, anterior, próxima, última página
+- Aplicado nos três tipos de clientes: Cadastrados, Fixos e Evadidos
 
-### Backend
-**Nova API Necessária:**
+### Backend - Alterações Opcionais
+Se o volume de dados for grande, considerar implementar paginação server-side:
 
-**admin_deleteadmfixedclient.asp**
-- POST: Remove cliente fixo
-- Parâmetros: id, salonId
-- Validação: Verificar se cliente pertence ao salão
-- Retorno: { success: true/false }
-
-### Database
-- Soft delete recomendado (adicionar campo `deleted_at`)
-- Ou hard delete com verificação de integridade referencial
-
----
-
-## 7. Exibição de Nome do Profissional em Bloqueios
-
-### Frontend
-**Arquivos:**
-- `src/pages/TimeBlocks.tsx`
-- `src/pages/SalonManagement.tsx`
-
-**Alterações:**
-- Exibição do nome do profissional abaixo da data em todos os bloqueios
-- Separação de feriados por categoria (Nacional, Estadual, Municipal)
-- Nome do profissional exibido em feriados e datas bloqueadas quando aplicável
-
-**Implementação:**
-```javascript
-{block.professionalId && (
-  <p className="text-xs text-muted-foreground">
-    Profissional: {professionals.find(p => p.id === block.professionalId)?.name || 'Desconhecido'}
-  </p>
-)}
-```
-
-### Backend
-**APIs Afetadas:**
-- `admin_getadmtimeblocks.asp`
-- `admin_getadmholidays.asp`
-- `admin_getadmblockeddates.asp`
-
-**Mudanças Necessárias:**
-Incluir `professionalName` no retorno JSON quando `professionalId` estiver presente:
-```json
-{
-  "id": "123",
-  "date": "2024-12-25",
-  "professionalId": "prof456",
-  "professionalName": "João Silva"
-}
-```
-
-### Database
-- Adicionar JOIN com tabela de profissionais nas queries de bloqueios
-- Garantir performance com índices apropriados
-
----
-
-## 8. Paginação de Clientes (Pendente)
-
-### Frontend
-**Status:** Implementação pendente para próxima fase
-
-**Requisitos:**
-- Paginação de 10/20/50 itens por página
-- Ordenação por:
-  - Nome (alfabético)
-  - Data de cadastro
-  - Última visita (para evadidos)
-- Filtros de busca por nome/telefone
-
-**Arquivos a Modificar:**
-- `src/components/ClientsManagement.tsx`
-
-**Bibliotecas Sugeridas:**
-- TanStack Table (react-table) para tabelas com sorting/pagination
-- Ou implementação custom com controle de estado
-
-### Backend
-**APIs a Modificar:**
-- `admin_getadmclients.asp`
-- `admin_getadmfixedclients.asp`
-- `admin_getadmchurnedclients.asp`
-
-**Parâmetros Adicionais:**
+**Parâmetros adicionais nas APIs:**
 ```
 page: número da página (default: 1)
 pageSize: itens por página (default: 20)
@@ -298,7 +231,7 @@ sortOrder: asc ou desc
 search: termo de busca (opcional)
 ```
 
-**Retorno Esperado:**
+**Retorno esperado:**
 ```json
 {
   "success": true,
@@ -314,35 +247,59 @@ search: termo de busca (opcional)
 
 ---
 
-## 9. APIs de Feriados Renomeadas
+## 7. Gerenciamento de Clientes Fixos (CRUD Completo) ✅ CONCLUÍDO
+
+### Frontend
+**Arquivo:** `src/components/ClientsManagement.tsx`
+
+**Funcionalidades:**
+- Botão "Alterar" para cada cliente fixo
+- Botão "Apagar" (X) com confirmação
+- Formulário reutilizado para criação e edição
+- Cancelamento de edição
+
+**Novas Funções:**
+- `handleEditFixedClient`: Carrega dados do cliente no formulário
+- `handleDeleteFixedClient`: Remove cliente fixo com confirmação
+- `handleCancelEdit`: Cancela edição e limpa formulário
 
 ### Backend
+**Nova API Necessária:**
+
+**admin_deleteadmfixedclient.asp**
+- POST: Remove cliente fixo
+- Parâmetros: `{"id": "123", "salonId": "xxx"}`
+- Validação: Verificar se cliente pertence ao salão
+- Retorno: `{ "success": true/false }`
+
+---
+
+## 8. Exibição de Nome do Profissional em Bloqueios ✅ CONCLUÍDO
+
+### Frontend
+**Arquivos Modificados:**
+- `src/pages/TimeBlocks.tsx`
+- `src/pages/SalonManagement.tsx`
+
 **Alterações:**
+- Nome do profissional exibido abaixo da data em todos os bloqueios
+- Separação de feriados por categoria (Nacional, Estadual, Municipal)
+- Profissional exibido quando aplicável
 
-**Antes:**
-- `admin_getadmmunicipaldays.asp`
-- `admin_setadmmunicipalday.asp`
-- `admin_deleteadmmunicipalday.asp`
-
-**Depois:**
+### Backend
+**APIs Afetadas:**
+- `admin_getadmtimeblocks.asp`
 - `admin_getadmholidays.asp`
-- `admin_setadmholidays.asp`
-- `admin_deleteadmholiday.asp`
+- `admin_getadmblockeddates.asp`
 
-**Mudanças Adicionais:**
-- Suporte para categorias: 'nacional', 'estadual', 'municipal'
-- Campo `type` no payload e retorno
-- Filtro por categoria na API GET
-
-**Payload Exemplo:**
+**Mudança Recomendada:**
+Incluir `professionalName` no retorno JSON:
 ```json
 {
-  "name": "Natal",
+  "id": "123",
   "date": "2024-12-25",
-  "type": "nacional",
-  "isRecurring": true,
-  "professionalId": null,
-  "salonId": "salon123"
+  "professionalId": "prof456",
+  "professionalName": "João Silva"
 }
 ```
 
@@ -350,30 +307,42 @@ search: termo de busca (opcional)
 
 ## Checklist de Implementação Backend
 
-### Prioridade ALTA (Bloqueadores)
-- [ ] Atualizar `admin_setadmprofessionals.asp` - nova lógica de dias da semana
-- [ ] Criar `admin_deleteadmfixedclient.asp` - deletar clientes fixos
-- [ ] Renomear e atualizar APIs de feriados (municipal → holidays com tipos)
-- [ ] Adicionar `professionalName` no retorno de bloqueios/feriados
+### ✅ Implementado no Frontend
+- [x] Correção dias da semana
+- [x] Sistema de roles (UI completa)
+- [x] Lembretes agrupados por profissional
+- [x] Máscaras com limite de caracteres
+- [x] Correção formato WhatsApp
+- [x] Paginação e ordenação de clientes
+- [x] CRUD de clientes fixos (frontend)
+- [x] Nome do profissional em bloqueios
 
-### Prioridade MÉDIA (Features Completas)
-- [ ] Criar sistema de user roles (3 APIs novas)
-- [ ] Migrar dados existentes de dias da semana (se necessário)
-- [ ] Atualizar validações de telefone para aceitar formato brasileiro
+### 🔧 Pendente no Backend (Prioridade ALTA)
+- [ ] Adicionar campo `role` no retorno de `admin_authlogin.asp`
+- [ ] Criar `admin_getadmusers.asp`
+- [ ] Criar `admin_setadmuserrole.asp`
+- [ ] Criar `admin_deleteadmuser.asp`
+- [ ] Criar `admin_deleteadmfixedclient.asp`
+- [ ] Adicionar `professionalName` no retorno de bloqueios
 
-### Prioridade BAIXA (Melhorias Futuras)
-- [ ] Implementar paginação nas APIs de clientes
-- [ ] Adicionar logging de alterações de roles
-- [ ] Criar relatórios de uso por perfil
+### 🔧 Pendente no Backend (Prioridade MÉDIA)
+- [ ] Validar dias da semana 1-7 no backend
+- [ ] Adicionar tabela `user_roles` no banco
+- [ ] Implementar verificações de permissão no backend
+
+### 🔧 Opcional (Melhorias Futuras)
+- [ ] Paginação server-side para grandes volumes
+- [ ] Logs de alterações de roles
+- [ ] Soft delete para clientes fixos
 
 ---
 
 ## Notas de Segurança
 
 1. **User Roles:**
-   - NUNCA armazenar roles em localStorage
-   - Sempre validar permissões no backend
-   - Usar RLS policies do Supabase
+   - Roles são validados a cada requisição no backend
+   - Frontend filtra menus, mas backend deve verificar permissões
+   - Não confiar apenas em sessionStorage
 
 2. **Validação de Inputs:**
    - Backend deve revalidar todas as máscaras
@@ -382,8 +351,7 @@ search: termo de busca (opcional)
 
 3. **WhatsApp:**
    - Validar formato de telefone antes de gerar links
-   - Limitar taxa de envio de mensagens
-   - Logs de mensagens enviadas
+   - Logs de mensagens enviadas recomendados
 
 ---
 
@@ -400,11 +368,19 @@ search: termo de busca (opcional)
 - [ ] Login como Staff - verificar acesso limitado
 - [ ] Tentar acessar rotas restritas
 
+### Clientes
+- [ ] Buscar cliente por nome
+- [ ] Buscar cliente por telefone
+- [ ] Ordenar por nome (A-Z e Z-A)
+- [ ] Ordenar por data
+- [ ] Navegar entre páginas
+- [ ] Alterar quantidade por página
+
 ### Clientes Fixos
 - [ ] Criar cliente fixo
 - [ ] Editar cliente fixo
 - [ ] Deletar cliente fixo
-- [ ] Verificar se agendamentos automáticos continuam funcionando
+- [ ] Cancelar edição
 
 ### WhatsApp
 - [ ] Enviar confirmação com telefone (11) 97582-4433
@@ -414,43 +390,11 @@ search: termo de busca (opcional)
 ### Bloqueios
 - [ ] Criar bloqueio com profissional
 - [ ] Verificar se nome aparece na listagem
-- [ ] Criar feriado nacional/estadual/municipal
+- [ ] Criar feriado de cada tipo
 - [ ] Verificar agrupamento correto
 
 ---
 
-## Compatibilidade
-
-### Frontend
-- React 18+
-- TypeScript 5+
-- Tailwind CSS 3+
-- Supabase JS Client
-
-### Backend
-- ASP Classic
-- SQL Server ou MySQL
-- IIS 7+
-
-### Browser Support
-- Chrome/Edge (últimas 2 versões)
-- Firefox (últimas 2 versões)
-- Safari (últimas 2 versões)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
----
-
-## Próximos Passos
-
-1. Implementar sistema completo de user roles
-2. Adicionar paginação e filtros avançados em clientes
-3. Melhorar responsividade em todas as telas
-4. Adicionar testes automatizados
-5. Implementar sistema de notificações push
-6. Dashboard com métricas e KPIs
-
----
-
 **Data de Criação:** 02/12/2024  
-**Última Atualização:** 02/12/2024  
-**Versão:** 1.0
+**Última Atualização:** 03/12/2024  
+**Versão:** 2.0
