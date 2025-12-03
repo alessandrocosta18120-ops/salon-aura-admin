@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,10 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, Phone, MessageSquare, X } from "lucide-react";
+import { Users, Phone, MessageSquare, X, Search } from "lucide-react";
 import { clientApi, professionalApi, serviceApi } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { sessionManager } from "@/lib/session";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { SortControls, SortDirection, SortField } from "@/components/ui/sort-controls";
 
 interface Client {
   id: string;
@@ -17,6 +19,7 @@ interface Client {
   phone: string;
   email: string;
   lastVisit: string;
+  createdAt?: string;
 }
 
 interface Professional {
@@ -40,6 +43,7 @@ interface FixedClient {
   professionalId: string;
   serviceId: string;
   active: boolean;
+  createdAt?: string;
 }
 
 const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
@@ -51,6 +55,17 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Search and filters
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Sorting state
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   // Fixed client form
   const [newFixedClient, setNewFixedClient] = useState({
@@ -66,13 +81,20 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
   // Reminder message for churned clients
   const [reminderMessage, setReminderMessage] = useState('');
   const [selectedChurned, setSelectedChurned] = useState<string[]>([]);
-  const [churnedPeriod, setChurnedPeriod] = useState('3'); // months
+  const [churnedPeriod, setChurnedPeriod] = useState('3');
   const [reminderMethod, setReminderMethod] = useState<'sms' | 'whatsapp' | 'both'>('both');
   
   // Broadcast message for registered clients
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [broadcastMethod, setBroadcastMethod] = useState<'sms' | 'whatsapp' | 'both'>('both');
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
+
+  const [editingFixedClient, setEditingFixedClient] = useState<FixedClient | null>(null);
+
+  // Reset pagination when tab or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchTerm, sortField, sortDirection]);
 
   useEffect(() => {
     loadData();
@@ -102,7 +124,64 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
-  const [editingFixedClient, setEditingFixedClient] = useState<FixedClient | null>(null);
+  // Sorting and filtering logic
+  const sortAndFilter = <T extends { name: string; phone: string; lastVisit?: string; createdAt?: string }>(
+    items: T[]
+  ): T[] => {
+    let filtered = items.filter(item => 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.phone.includes(searchTerm)
+    );
+
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      if (sortField === 'name') {
+        comparison = a.name.localeCompare(b.name);
+      } else if (sortField === 'phone') {
+        comparison = a.phone.localeCompare(b.phone);
+      } else if (sortField === 'date') {
+        const dateA = a.lastVisit || a.createdAt || '';
+        const dateB = b.lastVisit || b.createdAt || '';
+        comparison = dateA.localeCompare(dateB);
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+
+    return filtered;
+  };
+
+  // Memoized filtered/sorted data
+  const filteredClients = useMemo(() => sortAndFilter(clients), [clients, searchTerm, sortField, sortDirection]);
+  const filteredFixedClients = useMemo(() => sortAndFilter(fixedClients), [fixedClients, searchTerm, sortField, sortDirection]);
+  const filteredChurnedClients = useMemo(() => sortAndFilter(churnedClients), [churnedClients, searchTerm, sortField, sortDirection]);
+
+  // Paginated data
+  const paginatedClients = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredClients.slice(start, start + pageSize);
+  }, [filteredClients, currentPage, pageSize]);
+
+  const paginatedFixedClients = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredFixedClients.slice(start, start + pageSize);
+  }, [filteredFixedClients, currentPage, pageSize]);
+
+  const paginatedChurnedClients = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredChurnedClients.slice(start, start + pageSize);
+  }, [filteredChurnedClients, currentPage, pageSize]);
+
+  // Total pages calculation
+  const getTotalPages = (totalItems: number) => Math.ceil(totalItems / pageSize) || 1;
+
+  const handleSortChange = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
 
   const handleEditFixedClient = (client: FixedClient) => {
     setEditingFixedClient(client);
@@ -293,14 +372,35 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
   };
 
   const weekDays = [
-    { value: '1', label: 'Segunda-feira' },
-    { value: '2', label: 'Terça-feira' },
-    { value: '3', label: 'Quarta-feira' },
-    { value: '4', label: 'Quinta-feira' },
-    { value: '5', label: 'Sexta-feira' },
-    { value: '6', label: 'Sábado' },
-    { value: '7', label: 'Domingo' },
+    { value: '1', label: 'Domingo' },
+    { value: '2', label: 'Segunda-feira' },
+    { value: '3', label: 'Terça-feira' },
+    { value: '4', label: 'Quarta-feira' },
+    { value: '5', label: 'Quinta-feira' },
+    { value: '6', label: 'Sexta-feira' },
+    { value: '7', label: 'Sábado' },
   ];
+
+  // Search and sort controls component
+  const SearchAndSortControls = ({ showDateSort = true }: { showDateSort?: boolean }) => (
+    <div className="flex flex-col sm:flex-row gap-4 mb-4">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por nome ou telefone..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+      <SortControls
+        sortField={sortField}
+        sortDirection={sortDirection}
+        onSortChange={handleSortChange}
+        showDateSort={showDateSort}
+      />
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -311,27 +411,27 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
       />
 
       {/* Tab Navigation */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button
           variant={activeTab === 'registered' ? 'default' : 'outline'}
           onClick={() => setActiveTab('registered')}
         >
           <Users className="h-4 w-4 mr-2" />
-          Clientes Cadastrados
+          Cadastrados ({clients.length})
         </Button>
         <Button
           variant={activeTab === 'fixed' ? 'default' : 'outline'}
           onClick={() => setActiveTab('fixed')}
         >
           <Users className="h-4 w-4 mr-2" />
-          Clientes Fixos
+          Fixos ({fixedClients.length})
         </Button>
         <Button
           variant={activeTab === 'churned' ? 'default' : 'outline'}
           onClick={() => setActiveTab('churned')}
         >
           <MessageSquare className="h-4 w-4 mr-2" />
-          Clientes Evadidos
+          Evadidos ({churnedClients.length})
         </Button>
       </div>
 
@@ -342,44 +442,62 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
             <CardHeader>
               <CardTitle>Clientes Cadastrados</CardTitle>
               <CardDescription>
-                Lista de todos os clientes por ordem alfabética
+                Lista de todos os clientes com busca e ordenação
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <SearchAndSortControls />
+              
               {isLoading ? (
                 <p>Carregando...</p>
               ) : (
-                <div className="space-y-2">
-                  {clients.map((client) => (
-                    <div key={client.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                      <Checkbox
-                        checked={selectedClients.includes(client.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedClients(prev => [...prev, client.id]);
-                          } else {
-                            setSelectedClients(prev => prev.filter(id => id !== client.id));
-                          }
-                        }}
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium">{client.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Último agendamento: {client.lastVisit}
-                        </p>
+                <>
+                  <div className="space-y-2">
+                    {paginatedClients.map((client) => (
+                      <div key={client.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                        <Checkbox
+                          checked={selectedClients.includes(client.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedClients(prev => [...prev, client.id]);
+                            } else {
+                              setSelectedClients(prev => prev.filter(id => id !== client.id));
+                            }
+                          }}
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium">{client.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Último agendamento: {client.lastVisit}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{client.phone}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{client.phone}</span>
-                      </div>
-                    </div>
-                  ))}
-                  {clients.length === 0 && (
-                    <p className="text-center text-muted-foreground py-8">
-                      Nenhum cliente cadastrado
-                    </p>
+                    ))}
+                    {paginatedClients.length === 0 && (
+                      <p className="text-center text-muted-foreground py-8">
+                        {searchTerm ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {filteredClients.length > 0 && (
+                    <PaginationControls
+                      currentPage={currentPage}
+                      totalPages={getTotalPages(filteredClients.length)}
+                      pageSize={pageSize}
+                      totalItems={filteredClients.length}
+                      onPageChange={setCurrentPage}
+                      onPageSizeChange={(size) => {
+                        setPageSize(size);
+                        setCurrentPage(1);
+                      }}
+                    />
                   )}
-                </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -592,8 +710,10 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
               <CardTitle>Clientes Fixos Cadastrados</CardTitle>
             </CardHeader>
             <CardContent>
+              <SearchAndSortControls showDateSort={false} />
+              
               <div className="space-y-2">
-                {fixedClients.map((client) => (
+                {paginatedFixedClients.map((client) => (
                   <div key={client.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium">{client.name}</p>
@@ -623,12 +743,26 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
                     </div>
                   </div>
                 ))}
-                {fixedClients.length === 0 && (
+                {paginatedFixedClients.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
-                    Nenhum cliente fixo cadastrado
+                    {searchTerm ? 'Nenhum cliente encontrado' : 'Nenhum cliente fixo cadastrado'}
                   </p>
                 )}
               </div>
+              
+              {filteredFixedClients.length > 0 && (
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={getTotalPages(filteredFixedClients.length)}
+                  pageSize={pageSize}
+                  totalItems={filteredFixedClients.length}
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setCurrentPage(1);
+                  }}
+                />
+              )}
             </CardContent>
           </Card>
         </div>
@@ -645,7 +779,7 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-wrap">
                 <Label htmlFor="churnedPeriod">Clientes que não agendaram há</Label>
                 <Input
                   id="churnedPeriod"
@@ -672,8 +806,10 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <SearchAndSortControls />
+              
               <div className="space-y-4">
-                {churnedClients.map((client) => (
+                {paginatedChurnedClients.map((client) => (
                   <div key={client.id} className="flex items-center gap-3 p-3 border rounded-lg">
                     <Checkbox
                       checked={selectedChurned.includes(client.id)}
@@ -697,7 +833,26 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
                     </div>
                   </div>
                 ))}
+                {paginatedChurnedClients.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">
+                    {searchTerm ? 'Nenhum cliente encontrado' : 'Nenhum cliente evadido no período'}
+                  </p>
+                )}
               </div>
+              
+              {filteredChurnedClients.length > 0 && (
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={getTotalPages(filteredChurnedClients.length)}
+                  pageSize={pageSize}
+                  totalItems={filteredChurnedClients.length}
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setCurrentPage(1);
+                  }}
+                />
+              )}
             </CardContent>
           </Card>
 

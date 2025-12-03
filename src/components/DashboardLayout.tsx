@@ -23,20 +23,33 @@ import {
   CalendarDays,
   Store,
   UserCog,
+  Shield,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { salonApi } from "@/lib/api";
+import { sessionManager } from "@/lib/session";
+import { Badge } from "@/components/ui/badge";
 
-const menuItems = [
-  { title: "Início", url: "/dashboard", icon: Building2 },
-  { title: "Gestão de Agendamentos", url: "/dashboard/appointments", icon: CalendarDays },
-  { title: "Configurar Salão", url: "/dashboard/salon", icon: Store },
-  { title: "Gerenciar Profissionais", url: "/dashboard/professionals", icon: Users },
-  { title: "Cadastrar Serviços", url: "/dashboard/services", icon: Scissors },
-  { title: "Administrar Clientes", url: "/dashboard/clients", icon: UserCog },
-  { title: "Bloqueios de Horários", url: "/dashboard/time-blocks", icon: CalendarDays },
-  { title: "Financeiro", url: "/dashboard/financial", icon: Settings },
-  { title: "Configurações", url: "/dashboard/settings", icon: Settings },
+type UserRole = 'admin' | 'manager' | 'staff';
+
+interface MenuItem {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+  roles: UserRole[]; // Which roles can see this menu
+}
+
+const allMenuItems: MenuItem[] = [
+  { title: "Início", url: "/dashboard", icon: Building2, roles: ['admin', 'manager', 'staff'] },
+  { title: "Gestão de Agendamentos", url: "/dashboard/appointments", icon: CalendarDays, roles: ['admin', 'manager', 'staff'] },
+  { title: "Configurar Salão", url: "/dashboard/salon", icon: Store, roles: ['admin', 'manager'] },
+  { title: "Gerenciar Profissionais", url: "/dashboard/professionals", icon: Users, roles: ['admin', 'manager'] },
+  { title: "Cadastrar Serviços", url: "/dashboard/services", icon: Scissors, roles: ['admin', 'manager'] },
+  { title: "Administrar Clientes", url: "/dashboard/clients", icon: UserCog, roles: ['admin', 'manager'] },
+  { title: "Bloqueios de Horários", url: "/dashboard/time-blocks", icon: CalendarDays, roles: ['admin', 'manager', 'staff'] },
+  { title: "Financeiro", url: "/dashboard/financial", icon: Settings, roles: ['admin', 'manager'] },
+  { title: "Configurações", url: "/dashboard/settings", icon: Settings, roles: ['admin', 'manager'] },
+  { title: "Gerenciar Usuários", url: "/dashboard/users", icon: Shield, roles: ['admin'] },
 ];
 
 function AppSidebar() {
@@ -45,15 +58,49 @@ function AppSidebar() {
   const navigate = useNavigate();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
+  
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [userName, setUserName] = useState<string>('');
 
-  const isActive = (path: string) => currentPath === path;
+  useEffect(() => {
+    const session = sessionManager.get();
+    if (session) {
+      setUserRole(session.role || 'staff');
+      setUserName(session.userName || '');
+    }
+  }, []);
+
+  // Filter menu items based on user role
+  const visibleMenuItems = allMenuItems.filter(item => 
+    userRole && item.roles.includes(userRole)
+  );
+
   const getNavClasses = ({ isActive }: { isActive: boolean }) =>
     isActive
       ? "bg-primary text-primary-foreground font-medium"
       : "text-foreground hover:bg-muted/50";
 
   const handleLogout = () => {
+    sessionManager.clear();
     navigate("/login");
+  };
+
+  const getRoleBadgeVariant = (role: UserRole | null) => {
+    switch (role) {
+      case 'admin': return 'default';
+      case 'manager': return 'secondary';
+      case 'staff': return 'outline';
+      default: return 'outline';
+    }
+  };
+
+  const getRoleLabel = (role: UserRole | null) => {
+    switch (role) {
+      case 'admin': return 'Admin';
+      case 'manager': return 'Gerente';
+      case 'staff': return 'Profissional';
+      default: return '';
+    }
   };
 
   return (
@@ -73,11 +120,27 @@ function AppSidebar() {
           </div>
         </div>
 
+        {/* User info */}
+        {!isCollapsed && userName && (
+          <div className="p-4 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{userName}</p>
+              </div>
+              {userRole && (
+                <Badge variant={getRoleBadgeVariant(userRole)} className="text-xs">
+                  {getRoleLabel(userRole)}
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+
         <SidebarGroup>
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {visibleMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClasses}>

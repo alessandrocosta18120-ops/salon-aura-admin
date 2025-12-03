@@ -5,6 +5,7 @@ export interface SessionData {
   userName?: string;
   userId?: string;
   slug?: string;
+  role?: 'admin' | 'manager' | 'staff';
 }
 
 const SESSION_KEY = 'salon_admin_session';
@@ -37,6 +38,11 @@ export const sessionManager = {
   getSlug(): string | null {
     const session = this.get();
     return session?.slug || null;
+  },
+
+  getRole(): 'admin' | 'manager' | 'staff' | null {
+    const session = this.get();
+    return session?.role || null;
   },
 
   clear() {
