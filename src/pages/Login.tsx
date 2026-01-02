@@ -34,14 +34,15 @@ const Login = () => {
           description: "Redirecionando para o painel...",
         });
         
-        // Armazena sessão completa com salonId, userId e slug
+        // Armazena sessão completa com salonId, userId, slug e role
         if (result.data?.sessionId && result.data?.salonId) {
           const sessionData = {
             sessionId: result.data.sessionId,
             salonId: result.data.salonId,
             userName: result.data.userName || username,
             userId: result.data.userId, // ID do profissional/usuário logado
-            slug: result.data.slug // Slug do salão
+            slug: result.data.slug, // Slug do salão
+            role: result.data.role || 'staff' // Role do usuário (admin, manager, staff)
           };
           sessionStorage.setItem('salon_admin_session', JSON.stringify(sessionData));
         }
