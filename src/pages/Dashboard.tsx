@@ -6,6 +6,9 @@ import { Store, Users, Scissors, Settings, TrendingUp, UserPlus, Calendar } from
 import ClientsManagement from "@/components/ClientsManagement";
 import AppointmentDetails from "@/components/AppointmentDetails";
 import { appointmentApi, professionalApi, serviceApi, clientApi } from "@/lib/api";
+import { sessionManager } from "@/lib/session";
+
+type UserRole = 'admin' | 'manager' | 'staff';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -95,13 +98,16 @@ const Dashboard = () => {
     }
   };
 
-  const quickActions = [
+  const userRole = sessionManager.getRole() || 'staff';
+
+  const allQuickActions = [
     {
       title: "Configurar Salão",
       description: "Atualize informações básicas, horários e contatos",
       icon: Store,
       action: () => navigate("/dashboard/salon"),
       color: "from-primary to-primary-hover",
+      roles: ['admin', 'manager'] as UserRole[],
     },
     {
       title: "Gerenciar Profissionais",
@@ -109,6 +115,7 @@ const Dashboard = () => {
       icon: Users,
       action: () => navigate("/dashboard/professionals"),
       color: "from-success to-success",
+      roles: ['admin', 'manager'] as UserRole[],
     },
     {
       title: "Cadastrar Serviços",
@@ -116,6 +123,7 @@ const Dashboard = () => {
       icon: Scissors,
       action: () => navigate("/dashboard/services"),
       color: "from-secondary to-secondary-hover",
+      roles: ['admin', 'manager'] as UserRole[],
     },
     {
       title: "Administrar Clientes",
@@ -123,6 +131,7 @@ const Dashboard = () => {
       icon: UserPlus,
       action: () => navigate("/dashboard/clients"),
       color: "from-warning to-warning",
+      roles: ['admin', 'manager'] as UserRole[],
     },
     {
       title: "Configurações Gerais",
@@ -130,8 +139,12 @@ const Dashboard = () => {
       icon: Settings,
       action: () => navigate("/dashboard/settings"),
       color: "from-muted-foreground to-muted-foreground",
+      roles: ['admin', 'manager'] as UserRole[],
     },
   ];
+
+  // Filtra ações baseado no role do usuário
+  const quickActions = allQuickActions.filter(action => action.roles.includes(userRole));
 
   if (currentView === 'appointments') {
     return <AppointmentDetails onBack={() => setCurrentView('dashboard')} />;
@@ -179,40 +192,43 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Clients Overview */}
-      <Card className="shadow-md">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Clientes Cadastrados
-          </CardTitle>
-          <CardDescription>
-            Visualização rápida dos clientes do salão
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-2xl font-bold">{clientsCount}</p>
-              <p className="text-sm text-muted-foreground">Total de clientes</p>
+      {/* Clients Overview - Oculto para staff */}
+      {userRole !== 'staff' && (
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Clientes Cadastrados
+            </CardTitle>
+            <CardDescription>
+              Visualização rápida dos clientes do salão
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold">{clientsCount}</p>
+                <p className="text-sm text-muted-foreground">Total de clientes</p>
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/dashboard/clients")}
+                className="flex items-center gap-2"
+              >
+                <Calendar className="h-4 w-4" />
+                Ver Todos
+              </Button>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/dashboard/clients")}
-              className="flex items-center gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Ver Todos
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Quick Actions */}
-      <div>
-        <h3 className="text-xl font-semibold mb-6">Ações Rápidas</h3>
-        <div className="grid gap-6 md:grid-cols-2">
-          {quickActions.map((action) => (
+      {/* Quick Actions - Só exibe se houver ações disponíveis */}
+      {quickActions.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold mb-6">Ações Rápidas</h3>
+          <div className="grid gap-6 md:grid-cols-2">
+            {quickActions.map((action) => (
             <Card key={action.title} className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center gap-4">
@@ -231,9 +247,10 @@ const Dashboard = () => {
                 </Button>
               </CardContent>
             </Card>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -137,6 +137,19 @@ const TimeBlocks = () => {
     return professionals.find(p => p.id === id)?.name || "Desconhecido";
   };
 
+  const getRecurrenceLabel = (recurrenceType?: string): string => {
+    switch (recurrenceType) {
+      case "all_days":
+        return "Todos os Dias";
+      case "weekdays":
+        return "Dias Úteis";
+      case "day_of_week":
+        return "Mesmo Dia da Semana";
+      default:
+        return "Recorrente";
+    }
+  };
+
   return (
     <div className="space-y-8">
       <PageHeader 
@@ -289,6 +302,11 @@ const TimeBlocks = () => {
                     {block.reason && (
                       <div className="text-sm text-muted-foreground mt-1">
                         Motivo: {block.reason}
+                      </div>
+                    )}
+                    {(block.isRecurring || block.recurrenceType) && (
+                      <div className="text-sm text-blue-600 mt-1">
+                        🔄 {getRecurrenceLabel(block.recurrenceType)}
                       </div>
                     )}
                   </div>
