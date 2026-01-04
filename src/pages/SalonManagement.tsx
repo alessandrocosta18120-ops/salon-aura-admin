@@ -7,16 +7,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, MapPin, Phone, Instagram, Facebook, Youtube, Video, Upload, Calendar, X } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Instagram, Facebook, Youtube, Video, Upload, Calendar, X, Mail } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { salonApi, holidayApi, professionalApi } from "@/lib/api";
 import { sessionManager } from "@/lib/session";
-
+import { MaskedInput } from "@/components/ui/masked-input";
+import { phoneMask, emailValidation } from "@/lib/masks";
 interface SalonData {
   name: string;
   description: string;
   address: string;
   phone: string;
+  email: string;
   workingDays: string[];
   openTime: string;
   closeTime: string;
@@ -88,6 +90,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     description: "",
     address: "",
     phone: "",
+    email: "",
     workingDays: [],
     openTime: "",
     closeTime: "",
@@ -106,6 +109,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     whatsappCustomText: "",
     evadedClientsReminderText: "",
   });
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     loadSalonData();
@@ -374,15 +378,39 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                 <Label htmlFor="phone">Telefone *</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
+                  <MaskedInput
                     id="phone"
                     value={salonData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    mask={phoneMask}
+                    onChange={(value) => handleInputChange("phone", value)}
                     placeholder="(11) 99999-9999"
                     className="pl-10"
                     required
+                    maxLength={15}
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">E-mail do Salão</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={salonData.email}
+                    onChange={(e) => {
+                      handleInputChange("email", e.target.value);
+                      if (e.target.value && !emailValidation(e.target.value)) {
+                        setEmailError("E-mail inválido");
+                      } else {
+                        setEmailError("");
+                      }
+                    }}
+                    placeholder="contato@salao.com.br"
+                    className={`pl-10 ${emailError ? 'border-destructive' : ''}`}
+                  />
+                </div>
+                {emailError && <p className="text-sm text-destructive">{emailError}</p>}
               </div>
             </div>
             <div className="space-y-2">
@@ -525,6 +553,22 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                     onChange={(e) => setNewHoliday(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="Ex: Carnaval, Festa Junina..."
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="holidayCategory">Tipo de Feriado</Label>
+                  <Select
+                    value={newHoliday.category}
+                    onValueChange={(value) => setNewHoliday(prev => ({ ...prev, category: value as 'nacional' | 'estadual' | 'municipal' }))}
+                  >
+                    <SelectTrigger id="holidayCategory">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="municipal">Municipal</SelectItem>
+                      <SelectItem value="estadual">Estadual</SelectItem>
+                      <SelectItem value="nacional">Nacional</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="holidayDate">Data</Label>

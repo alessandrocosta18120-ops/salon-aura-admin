@@ -210,75 +210,126 @@ const ProfessionalsManagement = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Contato</TableHead>
-                <TableHead>Dias de Trabalho</TableHead>
-                <TableHead>Horário</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {professionals.map((professional) => (
-                <TableRow key={professional.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={professional.photoUrl || undefined} alt={professional.name} />
-                        <AvatarFallback>{professional.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span>{professional.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <div>{professional.email}</div>
-                      <div className="text-muted-foreground">{professional.phone}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {getWorkingDaysDisplay(professional.workingDays)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {professional.startTime} - {professional.endTime}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={professional.isActive ? "default" : "secondary"}>
+          {/* Desktop Table */}
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Contato</TableHead>
+                  <TableHead>Dias de Trabalho</TableHead>
+                  <TableHead>Horário</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {professionals.map((professional) => (
+                  <TableRow key={professional.id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={professional.photoUrl || undefined} alt={professional.name} />
+                          <AvatarFallback>{professional.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span>{professional.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div>{professional.email}</div>
+                        <div className="text-muted-foreground">{professional.phone}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {getWorkingDaysDisplay(professional.workingDays)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {professional.startTime} - {professional.endTime}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={professional.isActive ? "default" : "secondary"}>
+                        {professional.isActive ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/dashboard/professionals/edit/${professional.id}`)}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteClick(professional)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-4">
+            {professionals.map((professional) => (
+              <div key={professional.id} className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src={professional.photoUrl || undefined} alt={professional.name} />
+                    <AvatarFallback>{professional.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-medium">{professional.name}</p>
+                    <Badge variant={professional.isActive ? "default" : "secondary"} className="mt-1">
                       {professional.isActive ? "Ativo" : "Inativo"}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/dashboard/professionals/edit/${professional.id}`)}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteClick(professional)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Excluir
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </div>
+                </div>
+                
+                <div className="space-y-1 text-sm">
+                  <p><span className="text-muted-foreground">E-mail:</span> {professional.email}</p>
+                  <p><span className="text-muted-foreground">Telefone:</span> {professional.phone}</p>
+                  <p><span className="text-muted-foreground">Dias:</span> {getWorkingDaysDisplay(professional.workingDays)}</p>
+                  <p><span className="text-muted-foreground">Horário:</span> {professional.startTime} - {professional.endTime}</p>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => navigate(`/dashboard/professionals/edit/${professional.id}`)}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-destructive hover:text-destructive"
+                    onClick={() => handleDeleteClick(professional)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Excluir
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
