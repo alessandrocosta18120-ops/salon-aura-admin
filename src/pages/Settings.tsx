@@ -146,7 +146,7 @@ const Settings = () => {
               Notificações e Mensagens
             </CardTitle>
             <CardDescription>
-              Configure como os clientes recebem confirmações e lembretes
+              Configure como os clientes recebem confirmações e lembretes via WhatsApp
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -172,75 +172,6 @@ const Settings = () => {
                 placeholder="Personalize a mensagem de confirmação..."
                 rows={4}
               />
-            </div>
-
-            <div className="border-t pt-6 space-y-4">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="confirmationEnabled"
-                  checked={settings.confirmationEnabled}
-                  onCheckedChange={(checked) => handleInputChange("confirmationEnabled", checked)}
-                />
-                <Label htmlFor="confirmationEnabled" className="text-sm font-medium">
-                  Ativar mensagens de confirmação automáticas (lembretes antes do agendamento)
-                </Label>
-              </div>
-
-              {settings.confirmationEnabled && (
-                <div className="grid gap-4 md:grid-cols-3 pl-8">
-                  <div className="space-y-2">
-                    <Label>Quando enviar</Label>
-                    <Select
-                      value={settings.confirmationTiming}
-                      onValueChange={(value) => handleInputChange("confirmationTiming", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="previous_day">Dia anterior ao agendamento</SelectItem>
-                        <SelectItem value="morning">Manhã do dia do agendamento</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmationSendTime">Horário de Envio</Label>
-                    <Input
-                      id="confirmationSendTime"
-                      type="time"
-                      value={settings.confirmationSendTime}
-                      onChange={(e) => handleInputChange("confirmationSendTime", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-3">
-                    <Label htmlFor="confirmationCustomMessage">Texto Personalizado (opcional)</Label>
-                    <Textarea
-                      id="confirmationCustomMessage"
-                      value={settings.confirmationCustomMessage}
-                      onChange={(e) => handleInputChange("confirmationCustomMessage", e.target.value)}
-                      placeholder="Lembrete: Você tem um agendamento amanhã às {hora}..."
-                      rows={3}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notificationMethod">Método de Notificação</Label>
-              <Select
-                value={settings.notificationMethod}
-                onValueChange={(value) => handleInputChange("notificationMethod", value as "email" | "whatsapp" | "both")}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sms">Apenas SMS</SelectItem>
-                  <SelectItem value="whatsapp">Apenas WhatsApp</SelectItem>
-                  <SelectItem value="both">SMS e WhatsApp</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </CardContent>
         </Card>
@@ -350,48 +281,6 @@ const Settings = () => {
           </CardContent>
         </Card>
 
-        {/* Integrações */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5" />
-              Integrações
-            </CardTitle>
-            <CardDescription>
-              Configure as integrações com serviços externos
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="whatsappApi">API WhatsApp (Token)</Label>
-              <Input
-                id="whatsappApi"
-                type="password"
-                value={settings.whatsappApi}
-                onChange={(e) => handleInputChange("whatsappApi", e.target.value)}
-                placeholder="Token da API do WhatsApp"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="emailProvider">Provedor de E-mail</Label>
-              <Select
-                value={settings.emailProvider}
-                onValueChange={(value) => handleInputChange("emailProvider", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="smtp">SMTP Personalizado</SelectItem>
-                  <SelectItem value="gmail">Gmail</SelectItem>
-                  <SelectItem value="outlook">Outlook</SelectItem>
-                  <SelectItem value="sendgrid">SendGrid</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Sistema */}
         <Card>

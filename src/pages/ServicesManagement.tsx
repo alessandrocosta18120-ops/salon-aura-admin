@@ -103,70 +103,121 @@ const ServicesManagement = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Serviço</TableHead>
-                <TableHead>Profissionais</TableHead>
-                <TableHead>Duração</TableHead>
-                <TableHead>Preço</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {services.map((service) => (
-                <TableRow key={service.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{service.name}</div>
-                      {service.description && (
-                        <div className="text-sm text-muted-foreground">
-                          {service.description}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {service.professionalNames.map((name, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      {formatDuration(service.duration)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 font-medium text-success">
-                      <DollarSign className="w-4 h-4" />
-                      {formatPrice(service.price)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={service.isActive ? "default" : "secondary"}>
-                      {service.isActive ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/dashboard/services/edit/${service.id}`)}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Editar
-                  </Button>
-                  </TableCell>
+          {/* Desktop Table */}
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Serviço</TableHead>
+                  <TableHead>Profissionais</TableHead>
+                  <TableHead>Duração</TableHead>
+                  <TableHead>Preço</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {services.map((service) => (
+                  <TableRow key={service.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{service.name}</div>
+                        {service.description && (
+                          <div className="text-sm text-muted-foreground">
+                            {service.description}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {service.professionalNames.map((name, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        {formatDuration(service.duration)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 font-medium text-success">
+                        <DollarSign className="w-4 h-4" />
+                        {formatPrice(service.price)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={service.isActive ? "default" : "secondary"}>
+                        {service.isActive ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/dashboard/services/edit/${service.id}`)}
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-4">
+            {services.map((service) => (
+              <div key={service.id} className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="font-medium">{service.name}</p>
+                    {service.description && (
+                      <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
+                    )}
+                  </div>
+                  <Badge variant={service.isActive ? "default" : "secondary"}>
+                    {service.isActive ? "Ativo" : "Inativo"}
+                  </Badge>
+                </div>
+                
+                <div className="flex flex-wrap gap-1">
+                  {service.professionalNames.map((name, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {name}
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    {formatDuration(service.duration)}
+                  </div>
+                  <div className="flex items-center gap-1 font-medium text-success">
+                    <DollarSign className="w-4 h-4" />
+                    {formatPrice(service.price)}
+                  </div>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => navigate(`/dashboard/services/edit/${service.id}`)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>

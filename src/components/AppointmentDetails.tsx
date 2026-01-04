@@ -292,9 +292,10 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
                       key={appointment.id}
                       className="border rounded-lg p-4 space-y-3"
                     >
-                      <div className="flex items-start justify-between">
+                      {/* Mobile-first responsive layout */}
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">{appointment.clientName}</span>
                             <Badge className={getStatusColor(appointment.status)}>
@@ -306,7 +307,7 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
                             <span>{appointment.clientPhone}</span>
                           </div>
                         </div>
-                        <div className="text-right text-sm">
+                        <div className="text-left sm:text-right text-sm">
                           <p className="font-medium">{appointment.serviceName}</p>
                           <p className="text-muted-foreground">{appointment.duration} min</p>
                         </div>
@@ -319,7 +320,7 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
                         </div>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <Button 
                           size="sm" 
                           variant="outline" 
@@ -355,22 +356,22 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
             <CardTitle>Resumo do Dia</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-primary">{appointments.length}</p>
-                <p className="text-sm text-muted-foreground">Total de Agendamentos</p>
+                <p className="text-xl sm:text-2xl font-bold text-primary">{appointments.length}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Total</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-success">
+                <p className="text-xl sm:text-2xl font-bold text-success">
                   {appointments.filter(a => a.status === 'confirmed').length}
                 </p>
-                <p className="text-sm text-muted-foreground">Confirmados</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Confirmados</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-warning">
+                <p className="text-xl sm:text-2xl font-bold text-warning">
                   {appointments.filter(a => a.status === 'pending').length}
                 </p>
-                <p className="text-sm text-muted-foreground">Pendentes</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Pendentes</p>
               </div>
             </div>
           </CardContent>
