@@ -185,14 +185,15 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
 
   const handleEditFixedClient = (client: FixedClient) => {
     setEditingFixedClient(client);
+    // Normaliza para string para compatibilidade com Select
     setNewFixedClient({
       name: client.name,
       phone: client.phone,
       frequency: client.frequency,
-      weekDay: client.weekDay,
+      weekDay: String(client.weekDay),
       time: client.time,
-      professionalId: client.professionalId,
-      serviceId: client.serviceId
+      professionalId: String(client.professionalId),
+      serviceId: String(client.serviceId)
     });
   };
 
@@ -244,7 +245,14 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
       } else if (activeTab === 'fixed') {
         const response = await clientApi.getFixed();
         if (response.success) {
-          setFixedClients(response.data || []);
+          // Normaliza os dados para garantir que os IDs sejam strings
+          const normalizedData = (response.data || []).map((client: FixedClient) => ({
+            ...client,
+            weekDay: String(client.weekDay),
+            professionalId: String(client.professionalId),
+            serviceId: String(client.serviceId)
+          }));
+          setFixedClients(normalizedData);
         }
       } else if (activeTab === 'churned') {
         const response = await clientApi.getChurned();
@@ -274,9 +282,10 @@ const ClientsManagement = ({ onBack }: { onBack: () => void }) => {
     }
 
     try {
-      const userId = sessionManager.getSessionId();
+      const userId = sessionManager.getUserId();
       const salonId = sessionManager.getSalonId();
-      const dataToSend: any = { ...newFixedClient, userId, salonId };
+      const slug = sessionManager.getSlug();
+      const dataToSend: any = { ...newFixedClient, userId, salonId, slug };
       
       if (editingFixedClient) {
         dataToSend.id = editingFixedClient.id;

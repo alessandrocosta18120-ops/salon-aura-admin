@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { RequireRole } from "@/components/auth/RequireRole";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import SalonManagement from "./pages/SalonManagement";
@@ -34,18 +35,18 @@ const App = () => (
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="appointments" element={<Appointments />} />
-            <Route path="salon" element={<SalonManagement />} />
-            <Route path="professionals" element={<ProfessionalsManagement />} />
-            <Route path="professionals/new" element={<ProfessionalForm />} />
-            <Route path="professionals/edit/:id" element={<ProfessionalForm />} />
-            <Route path="services" element={<ServicesManagement />} />
-            <Route path="services/new" element={<ServiceForm />} />
-            <Route path="services/edit/:id" element={<ServiceForm />} />
-            <Route path="clients" element={<ClientsManagement onBack={() => window.history.back()} />} />
+            <Route path="salon" element={<RequireRole allowedRoles={['admin', 'manager']}><SalonManagement /></RequireRole>} />
+            <Route path="professionals" element={<RequireRole allowedRoles={['admin', 'manager']}><ProfessionalsManagement /></RequireRole>} />
+            <Route path="professionals/new" element={<RequireRole allowedRoles={['admin', 'manager']}><ProfessionalForm /></RequireRole>} />
+            <Route path="professionals/edit/:id" element={<RequireRole allowedRoles={['admin', 'manager']}><ProfessionalForm /></RequireRole>} />
+            <Route path="services" element={<RequireRole allowedRoles={['admin', 'manager']}><ServicesManagement /></RequireRole>} />
+            <Route path="services/new" element={<RequireRole allowedRoles={['admin', 'manager']}><ServiceForm /></RequireRole>} />
+            <Route path="services/edit/:id" element={<RequireRole allowedRoles={['admin', 'manager']}><ServiceForm /></RequireRole>} />
+            <Route path="clients" element={<RequireRole allowedRoles={['admin', 'manager']}><ClientsManagement onBack={() => window.history.back()} /></RequireRole>} />
             <Route path="time-blocks" element={<TimeBlocks />} />
-            <Route path="financial" element={<FinancialSettings />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="users" element={<UsersManagement />} />
+            <Route path="financial" element={<RequireRole allowedRoles={['admin', 'manager']}><FinancialSettings /></RequireRole>} />
+            <Route path="settings" element={<RequireRole allowedRoles={['admin', 'manager']}><Settings /></RequireRole>} />
+            <Route path="users" element={<RequireRole allowedRoles={['admin']}><UsersManagement /></RequireRole>} />
           </Route>
           <Route path="/" element={<Login />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

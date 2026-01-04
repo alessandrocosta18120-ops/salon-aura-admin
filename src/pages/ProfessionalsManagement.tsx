@@ -40,13 +40,13 @@ interface Professional {
 }
 
 const weekDays = [
-  { id: "1", label: "Segunda", short: "Seg" },
-  { id: "2", label: "Terça", short: "Ter" },
-  { id: "3", label: "Quarta", short: "Qua" },
-  { id: "4", label: "Quinta", short: "Qui" },
-  { id: "5", label: "Sexta", short: "Sex" },
-  { id: "6", label: "Sábado", short: "Sáb" },
-  { id: "7", label: "Domingo", short: "Dom" },
+  { id: "1", label: "Domingo", short: "Dom" },
+  { id: "2", label: "Segunda", short: "Seg" },
+  { id: "3", label: "Terça", short: "Ter" },
+  { id: "4", label: "Quarta", short: "Qua" },
+  { id: "5", label: "Quinta", short: "Qui" },
+  { id: "6", label: "Sexta", short: "Sex" },
+  { id: "7", label: "Sábado", short: "Sáb" },
 ];
 
 const ProfessionalsManagement = () => {
@@ -172,7 +172,10 @@ const ProfessionalsManagement = () => {
 
 
   const getWorkingDaysDisplay = (workingDays: string[]) => {
-    return workingDays
+    // Normaliza para string e ordena numericamente para exibir na ordem correta
+    const normalizedDays = workingDays.map(d => String(d));
+    return normalizedDays
+      .sort((a, b) => parseInt(a) - parseInt(b))
       .map(dayId => weekDays.find(day => day.id === dayId)?.short)
       .filter(Boolean)
       .join(", ");
