@@ -128,6 +128,21 @@ export const authApi = {
   logout: () => apiCall('authlogout', {}, 'POST', false),
 };
 
+// Professional Credentials APIs
+export const credentialsApi = {
+  // Verifica se username já existe (para validação em tempo real)
+  checkUsername: (username: string) => apiCall('checkusername', { username }, 'GET'),
+  // Salva/atualiza username e senha do profissional
+  setCredentials: (data: { professionalId: string; username: string; password: string }) => 
+    apiCall('setprofessionalcredentials', data, 'POST'),
+  // Obtém status das credenciais (se já criado, se precisa reset, etc.)
+  getCredentialsStatus: (professionalId: string) => 
+    apiCall('getprofessionalcredentialsstatus', { professionalId }),
+  // Envia e-mail com link de redefinição
+  sendResetEmail: (professionalId: string) => 
+    apiCall('sendcredentialsresetemail', { professionalId }, 'POST'),
+};
+
 // Holiday APIs
 export const holidayApi = {
   get: () => apiCall('getadmholidays'),
