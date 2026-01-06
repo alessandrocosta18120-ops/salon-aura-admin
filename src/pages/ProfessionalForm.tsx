@@ -106,14 +106,23 @@ const ProfessionalForm = () => {
       const response = await professionalApi.set(dataToSend);
       
       if (response.success) {
+        const isNewProfessional = !id;
+        const newProfessionalId = response.data?.id;
+        
         toast({
           title: id ? "Profissional atualizado!" : "Profissional cadastrado!",
           description: id 
             ? "As informações foram atualizadas com sucesso."
-            : "O profissional foi adicionado com sucesso.",
+            : "O profissional foi adicionado. Agora crie as credenciais de acesso.",
           className: "bg-blue-50 border-blue-200",
         });
-        navigate("/dashboard/professionals");
+        
+        // Se for novo profissional e temos o ID, redireciona para criar credenciais
+        if (isNewProfessional && newProfessionalId) {
+          navigate(`/dashboard/professionals/credentials/${newProfessionalId}`);
+        } else {
+          navigate("/dashboard/professionals");
+        }
       } else {
         throw new Error(response.error || "Erro ao salvar profissional");
       }

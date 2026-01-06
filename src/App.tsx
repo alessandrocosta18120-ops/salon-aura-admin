@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import SalonManagement from "./pages/SalonManagement";
 import ProfessionalsManagement from "./pages/ProfessionalsManagement";
 import ProfessionalForm from "./pages/ProfessionalForm";
+import ProfessionalCredentials from "./pages/ProfessionalCredentials";
 import ServicesManagement from "./pages/ServicesManagement";
 import ServiceForm from "./pages/ServiceForm";
 import Settings from "./pages/Settings";
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="professionals" element={<RequireRole allowedRoles={['admin', 'manager']}><ProfessionalsManagement /></RequireRole>} />
             <Route path="professionals/new" element={<RequireRole allowedRoles={['admin', 'manager']}><ProfessionalForm /></RequireRole>} />
             <Route path="professionals/edit/:id" element={<RequireRole allowedRoles={['admin', 'manager']}><ProfessionalForm /></RequireRole>} />
+            <Route path="professionals/credentials/:professionalId" element={<RequireRole allowedRoles={['admin', 'manager']}><ProfessionalCredentials /></RequireRole>} />
             <Route path="services" element={<RequireRole allowedRoles={['admin', 'manager']}><ServicesManagement /></RequireRole>} />
             <Route path="services/new" element={<RequireRole allowedRoles={['admin', 'manager']}><ServiceForm /></RequireRole>} />
             <Route path="services/edit/:id" element={<RequireRole allowedRoles={['admin', 'manager']}><ServiceForm /></RequireRole>} />

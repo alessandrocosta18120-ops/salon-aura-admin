@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, User, Calendar, Clock, Ban, Edit, Trash2 } from "lucide-react";
+import { Plus, User, Calendar, Clock, Ban, Edit, Trash2, Key } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { professionalApi, appointmentApi } from "@/lib/api";
 import { ReassignAppointmentsDialog } from "@/components/ReassignAppointmentsDialog";
@@ -269,6 +269,15 @@ const ProfessionalsManagement = () => {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => navigate(`/dashboard/professionals/credentials/${professional.id}`)}
+                          title="Gerenciar credenciais de acesso"
+                        >
+                          <Key className="h-4 w-4 mr-2" />
+                          Acesso
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleDeleteClick(professional)}
                           className="text-destructive hover:text-destructive"
                         >
@@ -307,7 +316,7 @@ const ProfessionalsManagement = () => {
                   <p><span className="text-muted-foreground">Horário:</span> {professional.startTime} - {professional.endTime}</p>
                 </div>
 
-                <div className="flex gap-2 pt-2">
+                <div className="flex flex-wrap gap-2 pt-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -316,6 +325,15 @@ const ProfessionalsManagement = () => {
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => navigate(`/dashboard/professionals/credentials/${professional.id}`)}
+                  >
+                    <Key className="h-4 w-4 mr-2" />
+                    Acesso
                   </Button>
                   <Button
                     variant="outline"
