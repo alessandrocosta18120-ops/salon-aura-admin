@@ -131,14 +131,23 @@ const Login = () => {
             >
               {isLoading ? "Entrando..." : "Entrar"}
             </Button>
-            <div className="text-center">
+            <div className="text-center flex flex-wrap justify-center gap-x-2">
               <Button
                 type="button"
                 variant="link"
                 onClick={handleForgotPassword}
-                className="text-primary hover:text-primary-hover"
+                className="text-primary hover:text-primary-hover px-1"
               >
                 Esqueci minha senha
+              </Button>
+              <span className="text-muted-foreground">|</span>
+              <Button
+                type="button"
+                variant="link"
+                onClick={() => navigate("/dashboard/professionals/credentials/recover?mode=recover")}
+                className="text-primary hover:text-primary-hover px-1"
+              >
+                Esqueci meu usuário
               </Button>
             </div>
           </form>
