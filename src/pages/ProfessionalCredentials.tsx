@@ -146,7 +146,7 @@ const ProfessionalCredentials = () => {
     setUsernameError("");
 
     try {
-      const response = await credentialsApi.checkUsername(usernameToCheck);
+      const response = await credentialsApi.checkUsername(usernameToCheck, professionalId);
       if (response.success) {
         const isAvailable = response.data?.available !== false;
         setUsernameAvailable(isAvailable);
