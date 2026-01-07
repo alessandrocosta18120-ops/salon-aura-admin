@@ -46,7 +46,7 @@ const allMenuItems: MenuItem[] = [
   { title: "Gerenciar Profissionais", url: "/dashboard/professionals", icon: Users, roles: ['admin', 'manager'] },
   { title: "Cadastrar Serviços", url: "/dashboard/services", icon: Scissors, roles: ['admin', 'manager'] },
   { title: "Administrar Clientes", url: "/dashboard/clients", icon: UserCog, roles: ['admin', 'manager'] },
-  { title: "Bloqueios de Horários", url: "/dashboard/time-blocks", icon: CalendarDays, roles: ['admin', 'manager', 'staff'] },
+  { title: "Bloqueios de Horários e Datas", url: "/dashboard/time-blocks", icon: CalendarDays, roles: ['admin', 'manager', 'staff'] },
   { title: "Financeiro", url: "/dashboard/financial", icon: Settings, roles: ['admin', 'manager'] },
   { title: "Configurações", url: "/dashboard/settings", icon: Settings, roles: ['admin', 'manager'] },
   { title: "Gerenciar Usuários", url: "/dashboard/users", icon: Shield, roles: ['admin'] },

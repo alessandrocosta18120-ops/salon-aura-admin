@@ -392,14 +392,14 @@ const TimeBlocks = () => {
                        <div className="flex-1">
                         <div className="font-medium">{getProfessionalName(block.professionalId)}</div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(block.date).toLocaleDateString('pt-BR')} • {block.startTime} - {block.endTime}
+                          {new Date(block.date + 'T00:00:00').toLocaleDateString('pt-BR')} • {block.startTime} - {block.endTime}
                         </div>
                         {block.reason && (
                           <div className="text-sm text-muted-foreground mt-1">
                             Motivo: {block.reason}
                           </div>
                         )}
-                        {(block.isRecurring || block.recurrenceType) && (
+                        {block.isRecurring === true && block.recurrenceType && (
                           <div className="text-sm text-blue-600 mt-1">
                             🔄 {getRecurrenceLabel(block.recurrenceType)}
                           </div>
@@ -505,7 +505,7 @@ const TimeBlocks = () => {
                       <div className="flex-1">
                         <div className="font-medium">{getProfessionalName(date.professionalId)}</div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(date.date).toLocaleDateString('pt-BR')}
+                          {new Date(date.date + 'T00:00:00').toLocaleDateString('pt-BR')}
                         </div>
                         <div className="text-sm text-muted-foreground mt-1">
                           Motivo: {date.name}
