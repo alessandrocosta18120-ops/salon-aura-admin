@@ -98,7 +98,14 @@ const ProfessionalForm = () => {
       const salonId = sessionManager.getSalonId();
       const userId = sessionManager.getUserId();
       const slug = sessionManager.getSlug();
-      const dataToSend = { ...formData, salonId, userId, slug };
+      const isUpdate = !!id;
+      const dataToSend = { 
+        ...formData, 
+        salonId, 
+        userId, 
+        slug,
+        action: isUpdate ? 'update' : 'create'
+      };
       if (id) {
         dataToSend.id = id;
       }
