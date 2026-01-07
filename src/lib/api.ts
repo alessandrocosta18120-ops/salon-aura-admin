@@ -130,10 +130,10 @@ export const authApi = {
 
 // Professional Credentials APIs
 export const credentialsApi = {
-  // Verifica se username já existe (para validação em tempo real)
+  // Verifica se username já existe (para validação em tempo real) - requer sessão
   checkUsername: (username: string, professionalId?: string) => 
     apiCall('checkusername', { username, professionalId }, 'GET'),
-  // Salva/atualiza username e senha do profissional
+  // Salva/atualiza username e senha do profissional - requer sessão
   setCredentials: (data: { professionalId: string; username: string; password: string }) => 
     apiCall('setprofessionalcredentials', data, 'POST'),
   // Obtém status das credenciais (se já criado, se precisa reset, etc.)
@@ -142,6 +142,18 @@ export const credentialsApi = {
   // Envia e-mail com link de redefinição
   sendResetEmail: (professionalId: string) => 
     apiCall('sendcredentialsresetemail', { professionalId }, 'POST'),
+  
+  // === APIs PÚBLICAS (não requerem sessão, usam token) ===
+  
+  // Valida o token de reset e retorna dados do profissional
+  validateResetToken: (professionalId: string, token: string) => 
+    apiCall('validateresettoken', { professionalId, token }, 'GET', false),
+  // Verifica username usando token (público)
+  checkUsernamePublic: (username: string, professionalId: string, token: string) => 
+    apiCall('checkusernamepublic', { username, professionalId, token }, 'GET', false),
+  // Salva credenciais usando token (público)
+  setCredentialsPublic: (data: { professionalId: string; username: string; password: string; token: string }) => 
+    apiCall('setprofessionalcredentialspublic', data, 'POST', false),
 };
 
 // Holiday APIs
