@@ -62,12 +62,6 @@ const Login = () => {
     }
   };
 
-  const handleForgotPassword = () => {
-    toast({
-      title: "Link enviado!",
-      description: "Verifique seu e-mail ou WhatsApp para redefinir a senha.",
-    });
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-muted via-background to-secondary/10 p-4">
@@ -135,7 +129,7 @@ const Login = () => {
               <Button
                 type="button"
                 variant="link"
-                onClick={handleForgotPassword}
+                onClick={() => navigate("/credentials/recovery?type=password")}
                 className="text-primary hover:text-primary-hover px-1"
               >
                 Esqueci minha senha
@@ -144,7 +138,7 @@ const Login = () => {
               <Button
                 type="button"
                 variant="link"
-                onClick={() => navigate("/dashboard/professionals/credentials/recover?mode=recover")}
+                onClick={() => navigate("/credentials/recovery?type=username")}
                 className="text-primary hover:text-primary-hover px-1"
               >
                 Esqueci meu usuário

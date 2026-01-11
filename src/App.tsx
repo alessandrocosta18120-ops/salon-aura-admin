@@ -12,6 +12,7 @@ import ProfessionalsManagement from "./pages/ProfessionalsManagement";
 import ProfessionalForm from "./pages/ProfessionalForm";
 import ProfessionalCredentials from "./pages/ProfessionalCredentials";
 import PublicCredentialsReset from "./pages/PublicCredentialsReset";
+import CredentialsRecovery from "./pages/CredentialsRecovery";
 import ServicesManagement from "./pages/ServicesManagement";
 import ServiceForm from "./pages/ServiceForm";
 import Settings from "./pages/Settings";
@@ -34,8 +35,9 @@ const App = () => (
         <ScrollToTop />
         <Routes>
           <Route path="/login" element={<Login />} />
-          {/* Rota pública para reset de credenciais via link de e-mail */}
+          {/* Rotas públicas para credenciais */}
           <Route path="/credentials/reset/:professionalId" element={<PublicCredentialsReset />} />
+          <Route path="/credentials/recovery" element={<CredentialsRecovery />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="appointments" element={<Appointments />} />

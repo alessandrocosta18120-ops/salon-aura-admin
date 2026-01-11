@@ -392,7 +392,7 @@ const TimeBlocks = () => {
                        <div className="flex-1">
                         <div className="font-medium">{getProfessionalName(block.professionalId)}</div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(block.date + 'T00:00:00').toLocaleDateString('pt-BR')} • {block.startTime} - {block.endTime}
+                          {new Date(block.date.includes('T') ? block.date : block.date + 'T00:00:00').toLocaleDateString('pt-BR')} • {block.startTime} - {block.endTime}
                         </div>
                         {block.reason && (
                           <div className="text-sm text-muted-foreground mt-1">
@@ -505,7 +505,7 @@ const TimeBlocks = () => {
                       <div className="flex-1">
                         <div className="font-medium">{getProfessionalName(date.professionalId)}</div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(date.date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                          {new Date(date.date.includes('T') ? date.date : date.date + 'T00:00:00').toLocaleDateString('pt-BR')}
                         </div>
                         <div className="text-sm text-muted-foreground mt-1">
                           Motivo: {date.name}
