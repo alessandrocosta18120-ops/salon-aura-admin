@@ -154,6 +154,9 @@ export const credentialsApi = {
   // Salva credenciais usando token (público)
   setCredentialsPublic: (data: { professionalId: string; username: string; password: string; token: string }) => 
     apiCall('setprofessionalcredentialspublic', data, 'POST', false),
+  // Envia e-mail de recuperação de senha/usuário (público)
+  sendRecoveryEmail: (email: string, type: string) => 
+    apiCall('sendrecoveryemail', { email, type }, 'POST', false),
 };
 
 // Holiday APIs
