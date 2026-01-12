@@ -157,6 +157,12 @@ export const credentialsApi = {
   // Envia e-mail de recuperação de senha/usuário (público)
   sendRecoveryEmail: (email: string, type: string) => 
     apiCall('sendrecoveryemail', { email, type }, 'POST', false),
+  // Valida token de redefinição de senha (público - apenas senha)
+  validatePasswordResetToken: (token: string) => 
+    apiCall('validatepasswordresettoken', { token }, 'GET', false),
+  // Redefine a senha usando token (público)
+  resetPassword: (data: { token: string; password: string }) => 
+    apiCall('resetpassword', data, 'POST', false),
 };
 
 // Holiday APIs
