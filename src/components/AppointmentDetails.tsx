@@ -174,32 +174,33 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
+    <div className="space-y-6 w-full max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <Button variant="ghost" onClick={onBack} className="flex items-center gap-2 w-fit">
           <ArrowLeft className="h-4 w-4" />
           Voltar
         </Button>
         <div className="flex-1">
-          <h2 className="text-3xl font-bold tracking-tight">Agendamentos</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Agendamentos</h2>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Detalhamento completo dos agendamentos
           </p>
         </div>
       </div>
 
       {/* Date Navigation */}
-      <Card>
+      <Card className="w-full">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between gap-4">
-            <Button variant="outline" size="icon" onClick={handlePreviousDay}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <Button variant="outline" size="icon" onClick={handlePreviousDay} className="w-full sm:w-auto">
               <ChevronLeft className="h-4 w-4" />
+              <span className="sm:hidden ml-2">Dia Anterior</span>
             </Button>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center w-full sm:w-auto">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
+                  <Button variant="outline" className="w-full sm:w-[280px] justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {format(selectedDate, "PPP", { locale: ptBR })}
                   </Button>
@@ -216,7 +217,8 @@ const AppointmentDetails = ({ onBack }: { onBack: () => void }) => {
               </Popover>
             </div>
 
-            <Button variant="outline" size="icon" onClick={handleNextDay}>
+            <Button variant="outline" size="icon" onClick={handleNextDay} className="w-full sm:w-auto">
+              <span className="sm:hidden mr-2">Próximo Dia</span>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

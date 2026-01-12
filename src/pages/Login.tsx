@@ -144,6 +144,26 @@ const Login = () => {
                 Esqueci meu usuário
               </Button>
             </div>
+            
+            {/* Notice for new users */}
+            <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border">
+              <p className="text-sm text-muted-foreground text-center">
+                Não tem cadastro ainda no datebook?{" "}
+                <span className="font-medium text-foreground">
+                  Cadastre-se para usar a plataforma.
+                </span>{" "}
+                Acesse{" "}
+                <a 
+                  href="https://datebook.com.br" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:text-primary-hover underline font-medium"
+                >
+                  datebook.com.br
+                </a>{" "}
+                e organize a sua agenda!
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>
