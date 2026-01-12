@@ -12,6 +12,7 @@ import ProfessionalsManagement from "./pages/ProfessionalsManagement";
 import ProfessionalForm from "./pages/ProfessionalForm";
 import ProfessionalCredentials from "./pages/ProfessionalCredentials";
 import PublicCredentialsReset from "./pages/PublicCredentialsReset";
+import PublicPasswordReset from "./pages/PublicPasswordReset";
 import CredentialsRecovery from "./pages/CredentialsRecovery";
 import ServicesManagement from "./pages/ServicesManagement";
 import ServiceForm from "./pages/ServiceForm";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           {/* Rotas públicas para credenciais */}
           <Route path="/credentials/reset/:professionalId" element={<PublicCredentialsReset />} />
+          <Route path="/credentials/password-reset" element={<PublicPasswordReset />} />
           <Route path="/credentials/recovery" element={<CredentialsRecovery />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
