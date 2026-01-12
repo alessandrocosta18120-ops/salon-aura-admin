@@ -360,6 +360,80 @@ resetPassword: (data: { token: string; password: string }) =>
 - [ ] Navegação de datas funciona corretamente
 - [ ] Cards de agendamento empilham verticalmente em telas pequenas
 
+### Responsividade de Gerenciamento de Usuários
+- [ ] Cards de níveis de acesso empilham em coluna no mobile
+- [ ] Tabela de usuários substitui por cards no mobile
+- [ ] Botões de ação acessíveis em telas pequenas
+
+---
+
+## 5. Melhorias de Responsividade e UX (12/01/2026)
+
+### 5.1 Componente AppointmentDetails
+Arquivo: `src/components/AppointmentDetails.tsx`
+
+**Alterações:**
+- Container principal com `w-full max-w-full overflow-x-hidden`
+- Cabeçalho ajustado para `flex-col sm:flex-row`
+- Botões de navegação de data com texto descritivo em mobile
+- Calendário ocupa largura total em mobile (`w-full sm:w-[280px]`)
+- Títulos com tamanho responsivo (`text-2xl sm:text-3xl`)
+
+### 5.2 Página de Gerenciamento de Usuários
+Arquivo: `src/pages/UsersManagement.tsx`
+
+**Alterações:**
+- Container principal com `w-full max-w-full overflow-x-hidden`
+- Grid de níveis de acesso: `grid-cols-1 md:grid-cols-3`
+- Tabela de usuários visível apenas em desktop (`hidden md:block`)
+- Cards de usuários visíveis apenas em mobile (`md:hidden`)
+- Cada card exibe nome, e-mail (com quebra de linha), status, permissão e ações
+- Padding responsivo do CardContent (`p-4 sm:p-6`)
+
+### 5.3 Aviso de Cadastro na Tela de Login
+Arquivo: `src/pages/Login.tsx`
+
+**Alteração:**
+Adicionado aviso abaixo do formulário de login:
+
+```jsx
+<div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border">
+  <p className="text-sm text-muted-foreground text-center">
+    Não tem cadastro ainda no datebook?{" "}
+    <span className="font-medium text-foreground">
+      Cadastre-se para usar a plataforma.
+    </span>{" "}
+    Acesse{" "}
+    <a 
+      href="https://datebook.com.br" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="text-primary hover:text-primary-hover underline font-medium"
+    >
+      datebook.com.br
+    </a>{" "}
+    e organize a sua agenda!
+  </p>
+</div>
+```
+
+---
+
+## Resumo Atualizado das Alterações por Arquivo (12/01/2026)
+
+| Arquivo | Tipo | Descrição |
+|---------|------|-----------|
+| `src/pages/TimeBlocks.tsx` | Modificado | Correção do parsing de data ISO |
+| `src/pages/CredentialsRecovery.tsx` | **Criado** | Tela de recuperação de credenciais |
+| `src/pages/PublicPasswordReset.tsx` | **Criado** | Tela pública de redefinição de senha |
+| `src/pages/Login.tsx` | Modificado | Links de recuperação + aviso de cadastro |
+| `src/App.tsx` | Modificado | Rotas `/credentials/recovery` e `/credentials/password-reset` |
+| `src/lib/api.ts` | Modificado | Funções de recuperação de credenciais |
+| `src/pages/Appointments.tsx` | Modificado | Estrutura simplificada e responsiva |
+| `src/components/AppointmentDetails.tsx` | Modificado | Layout responsivo para mobile |
+| `src/pages/UsersManagement.tsx` | Modificado | Cards para mobile, tabela para desktop |
+| `2026-01-11_plano_implementacao_alteracoes.md` | Atualizado | Este documento |
+
 ---
 
 ## Observações Finais
@@ -370,3 +444,4 @@ resetPassword: (data: { token: string; password: string }) =>
 4. Tokens devem ser invalidados após uso único
 5. Logs de tentativas de recuperação devem ser mantidos para auditoria
 6. Senhas devem ser hasheadas com algoritmo seguro (bcrypt ou similar) no backend
+7. Todas as páginas agora são responsivas e funcionam corretamente em dispositivos móveis
