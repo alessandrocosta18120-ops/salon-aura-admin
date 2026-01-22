@@ -461,14 +461,14 @@ const Dashboard = () => {
                           <button
                             key={apt.id}
                             onClick={() => handleAppointmentClick(apt)}
-                            className="flex items-center gap-2 px-3 py-2 rounded-md text-white text-sm transition-all hover:opacity-80 cursor-pointer"
+                            className="flex items-center gap-2 px-3 py-2 rounded-md text-black text-sm transition-all hover:opacity-80 cursor-pointer"
                             style={{ backgroundColor: getProfessionalColor(apt.professionalId) }}
                           >
                             <User className="h-4 w-4" />
                             <span className="font-medium">{apt.clientName}</span>
-                            <span className="opacity-80">• {apt.serviceName}</span>
+                            <span className="opacity-90">• {apt.serviceName}</span>
                             {professionals.length > 1 && (
-                              <span className="opacity-70 text-xs">({apt.professionalName})</span>
+                              <span className="opacity-80 text-xs">({apt.professionalName})</span>
                             )}
                           </button>
                         ))}
