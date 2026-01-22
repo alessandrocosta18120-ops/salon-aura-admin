@@ -124,10 +124,10 @@ const Dashboard = () => {
         setConfirmationText(salonResponse.data.whatsappCustomText || "");
       }
 
-      // Load slot size
-      const slotResponse = await settingsApi.getSlotSize();
-      if (slotResponse.success && slotResponse.data) {
-        setSlotSize(slotResponse.data.slotSize || 30);
+      // Load slot size from settings
+      const settingsResponse = await settingsApi.get();
+      if (settingsResponse.success && settingsResponse.data) {
+        setSlotSize(settingsResponse.data.slotSize || 30);
       }
     } catch (error) {
       console.error("Erro ao carregar dados iniciais:", error);
