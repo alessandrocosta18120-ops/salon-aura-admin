@@ -419,15 +419,140 @@ Adicionado aviso abaixo do formulário de login:
 
 ---
 
-## Resumo Atualizado das Alterações por Arquivo (12/01/2026)
+## 6. Novo Dashboard com Calendário e Slots de Agendamento
+
+### Descrição
+O Dashboard foi completamente redesenhado para exibir um calendário navegável com slots de horário, permitindo gestão visual de agendamentos diretamente na tela principal.
+
+### Funcionalidades Implementadas
+
+#### 6.1 Calendário Navegável
+- Calendário exibido no topo com navegação por dia e mês
+- Botões para avançar/retroceder dias
+- Botões para avançar/retroceder meses
+- Clique no dia seleciona e carrega os slots correspondentes
+
+#### 6.2 Slots de Horários
+- Slots gerados automaticamente com base no horário de funcionamento e tamanho do slot (30 ou 60 min)
+- Slots vazios exibem botão para criar novo agendamento
+- Slots ocupados exibem informações do cliente, serviço e profissional
+
+#### 6.3 Cores por Profissional
+- Quando há múltiplos profissionais, cada um recebe uma cor única
+- Cor pode vir da API (campo `color` do profissional)
+- Fallback para paleta de 8 cores HSL predefinidas
+- Legenda exibida apenas quando há mais de um profissional ativo
+
+#### 6.4 Menu de Ações do Agendamento
+Ao clicar em um slot com agendamento, abre-se um dialog com:
+
+| Botão | Cor | Ação |
+|-------|-----|------|
+| Ligar | Outline | Abre discador telefônico |
+| WhatsApp | Outline | Envia mensagem padrão de confirmação |
+| Confirmar via WhatsApp | Verde (success) | Envia texto de confirmação da API |
+| Reagendar | Amarelo (warning) | Abre dialog para nova data/hora |
+| Cancelar | Vermelho (destructive) | Cancela com confirmação |
+
+#### 6.5 Cancelamento de Agendamento
+- AlertDialog de confirmação antes de cancelar
+- Mensagem clara: "Esta ação não poderá ser desfeita"
+- Envia para API com `action: 'cancel'`
+
+#### 6.6 Reagendamento
+- Dialog com seletor de nova data (calendário)
+- Select com horários disponíveis
+- Envia para API com `action: 'reschedule'`, nova `date` e `time`
+
+#### 6.7 Novo Agendamento em Slot Vazio
+- Campos: Nome do Cliente, WhatsApp, Profissional, Serviço
+- Validação de campos obrigatórios
+- Envia para API com `action: 'create'`
+
+#### 6.8 Resumo do Dia (Rodapé)
+- Mantido o card de resumo com:
+  - Total de agendamentos
+  - Confirmados (verde)
+  - Pendentes (amarelo)
+
+#### 6.9 Remoções
+- Removidos os cards de estatísticas antigos
+- Removidos os botões de "Ações Rápidas" (links do menu lateral são suficientes)
+- Removido o card "Clientes Cadastrados"
+
+### Arquivo Alterado
+- `src/pages/Dashboard.tsx` - Reescrito completamente
+
+### APIs Utilizadas
+
+| API | Método | Uso |
+|-----|--------|-----|
+| `getadmprofessionals` | GET | Lista profissionais ativos |
+| `getadmservices` | GET | Lista serviços ativos |
+| `getadmsalon` | GET | Horário de funcionamento e texto de confirmação |
+| `getadmslotsize` | GET | Tamanho do slot (30/60 min) |
+| `getadmappointmentsbydate` | GET | Agendamentos do dia selecionado |
+| `setadmappointments` | POST | Criar/alterar/cancelar agendamentos |
+
+### Payload para setadmappointments
+
+**Cancelar:**
+```json
+{
+  "id": "appointment_id",
+  "status": "cancelled",
+  "action": "cancel"
+}
+```
+
+**Reagendar:**
+```json
+{
+  "id": "appointment_id",
+  "date": "2026-01-22",
+  "time": "14:30",
+  "action": "reschedule"
+}
+```
+
+**Criar:**
+```json
+{
+  "clientName": "Maria Silva",
+  "clientPhone": "(11) 99999-9999",
+  "professionalId": "prof_id",
+  "serviceId": "service_id",
+  "date": "2026-01-22",
+  "time": "10:00",
+  "action": "create"
+}
+```
+
+### Campo Opcional na API de Profissionais
+Para cores customizadas por profissional, a API `getadmprofessionals` pode retornar:
+```json
+{
+  "id": "prof_id",
+  "name": "João",
+  "color": "hsl(200, 70%, 50%)",
+  "isActive": true
+}
+```
+
+Se `color` estiver ausente ou vazio, o sistema usa cores fallback.
+
+---
+
+## Resumo Atualizado das Alterações por Arquivo (22/01/2026)
 
 | Arquivo | Tipo | Descrição |
 |---------|------|-----------|
+| `src/pages/Dashboard.tsx` | **Reescrito** | Novo layout com calendário e slots de agendamento |
 | `src/pages/TimeBlocks.tsx` | Modificado | Correção do parsing de data ISO |
-| `src/pages/CredentialsRecovery.tsx` | **Criado** | Tela de recuperação de credenciais |
-| `src/pages/PublicPasswordReset.tsx` | **Criado** | Tela pública de redefinição de senha |
+| `src/pages/CredentialsRecovery.tsx` | Criado | Tela de recuperação de credenciais |
+| `src/pages/PublicPasswordReset.tsx` | Criado | Tela pública de redefinição de senha |
 | `src/pages/Login.tsx` | Modificado | Links de recuperação + aviso de cadastro |
-| `src/App.tsx` | Modificado | Rotas `/credentials/recovery` e `/credentials/password-reset` |
+| `src/App.tsx` | Modificado | Rotas públicas de credenciais |
 | `src/lib/api.ts` | Modificado | Funções de recuperação de credenciais |
 | `src/pages/Appointments.tsx` | Modificado | Estrutura simplificada e responsiva |
 | `src/components/AppointmentDetails.tsx` | Modificado | Layout responsivo para mobile |
@@ -436,12 +561,55 @@ Adicionado aviso abaixo do formulário de login:
 
 ---
 
+## Checklist de Testes do Novo Dashboard
+
+### Calendário e Navegação
+- [ ] Calendário exibe mês/ano atual corretamente
+- [ ] Botões de navegação de mês funcionam
+- [ ] Botões de navegação de dia funcionam
+- [ ] Clique no dia do calendário seleciona e carrega slots
+- [ ] Data selecionada é destacada visualmente
+
+### Slots de Horários
+- [ ] Slots são gerados com base no horário de funcionamento
+- [ ] Slots respeitam o tamanho configurado (30 ou 60 min)
+- [ ] Slot vazio exibe botão "Horário disponível"
+- [ ] Slot com agendamento exibe dados do cliente/serviço
+
+### Cores de Profissionais
+- [ ] Legenda só aparece quando há 2+ profissionais
+- [ ] Cada profissional tem cor distinta
+- [ ] Cor da API é usada quando disponível
+- [ ] Fallback funciona quando cor não está na API
+
+### Ações do Agendamento
+- [ ] Clicar em slot ocupado abre menu de ações
+- [ ] Botão Ligar abre discador
+- [ ] Botão WhatsApp envia mensagem padrão
+- [ ] Botão Confirmar envia texto customizado
+- [ ] Botão Reagendar abre dialog com calendário e horários
+- [ ] Botão Cancelar exibe confirmação antes de cancelar
+- [ ] Após cancelar, slot é atualizado
+
+### Novo Agendamento
+- [ ] Clicar em slot vazio abre formulário
+- [ ] Campos obrigatórios são validados
+- [ ] Select de profissionais exibe apenas ativos
+- [ ] Select de serviços exibe apenas ativos
+- [ ] Após criar, slot é atualizado com novo agendamento
+
+### Resumo do Dia
+- [ ] Card de resumo exibe totais corretos
+- [ ] Cores indicam status (confirmado/pendente)
+
+---
+
 ## Observações Finais
 
-1. As APIs `admin_sendrecoveryemail.asp`, `admin_validatepasswordresettoken.asp` e `admin_resetpassword.asp` precisam ser implementadas no backend ASP
-2. Recomenda-se implementar rate limiting para evitar spam de e-mails e ataques de força bruta
-3. Tokens de recuperação devem ter expiração de 24 horas por segurança
+1. As APIs de credenciais precisam ser implementadas no backend ASP
+2. Recomenda-se implementar rate limiting para segurança
+3. Tokens de recuperação devem ter expiração de 24 horas
 4. Tokens devem ser invalidados após uso único
-5. Logs de tentativas de recuperação devem ser mantidos para auditoria
-6. Senhas devem ser hasheadas com algoritmo seguro (bcrypt ou similar) no backend
-7. Todas as páginas agora são responsivas e funcionam corretamente em dispositivos móveis
+5. O campo `color` nos profissionais é opcional (fallback automático)
+6. O campo `action` nos payloads de agendamento ajuda o backend a diferenciar operações
+7. Todas as páginas são responsivas e funcionam em dispositivos móveis
