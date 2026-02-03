@@ -32,7 +32,13 @@ export const serviceSchema = z.object({
   professionalIds: z.array(z.string())
     .min(1, "Selecione pelo menos um profissional"),
   
-  isActive: z.boolean()
+  isActive: z.boolean(),
+  
+  requiresDeposit: z.boolean(),
+  
+  depositAmount: z.number()
+    .min(0, "Valor da taxa deve ser positivo")
+    .max(100000, "Valor máximo: R$ 100.000")
 });
 
 // Professional validation schema
