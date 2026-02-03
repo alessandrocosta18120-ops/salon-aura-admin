@@ -369,27 +369,13 @@ const Dashboard = () => {
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col gap-4">
-            {/* Month navigation */}
-            <div className="flex items-center justify-between">
-              <Button variant="outline" size="sm" onClick={handlePreviousMonth}>
-                <ChevronLeft className="h-4 w-4" />
-                <span className="hidden sm:inline ml-1">Mês</span>
-              </Button>
-              <span className="font-semibold text-lg">
-                {format(selectedDate, "MMMM yyyy", { locale: ptBR })}
-              </span>
-              <Button variant="outline" size="sm" onClick={handleNextMonth}>
-                <span className="hidden sm:inline mr-1">Mês</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-
             {/* Calendar */}
             <div className="flex justify-center">
               <Calendar
                 mode="single"
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
+                onMonthChange={(month) => setSelectedDate(month)}
                 locale={ptBR}
                 className="rounded-md border pointer-events-auto"
               />
