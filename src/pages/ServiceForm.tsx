@@ -24,6 +24,8 @@ interface Service {
   price: number;
   professionalIds: string[];
   isActive: boolean;
+  requiresDeposit: boolean;
+  depositAmount: number;
 }
 
 interface Professional {
@@ -44,6 +46,8 @@ const ServiceForm = () => {
     price: 0,
     professionalIds: [],
     isActive: true,
+    requiresDeposit: false,
+    depositAmount: 0,
   });
 
   useEffect(() => {
@@ -78,6 +82,8 @@ const ServiceForm = () => {
             price: service.price,
             professionalIds: Array.isArray(service.professionalIds) ? service.professionalIds : [],
             isActive: service.isActive,
+            requiresDeposit: service.requiresDeposit || false,
+            depositAmount: service.depositAmount || 0,
           });
         }
       }
@@ -278,6 +284,33 @@ const ServiceForm = () => {
               <Label htmlFor="isActive" className="cursor-pointer">
                 Serviço ativo
               </Label>
+            </div>
+
+            {/* Taxa de Reserva (Sinal) */}
+            <div className="space-y-4 rounded-lg border p-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="requiresDeposit"
+                  checked={formData.requiresDeposit}
+                  onCheckedChange={(checked) => handleInputChange("requiresDeposit", !!checked)}
+                />
+                <Label htmlFor="requiresDeposit" className="cursor-pointer font-medium">
+                  Exigir taxa de reserva (sinal)
+                </Label>
+              </div>
+              
+              {formData.requiresDeposit && (
+                <div className="space-y-2 pl-6">
+                  <Label htmlFor="depositAmount">Valor da Taxa de Reserva (R$)</Label>
+                  <MaskedInput
+                    id="depositAmount"
+                    mask={currencyMask}
+                    value={formData.depositAmount.toString()}
+                    onChange={(value) => handleInputChange("depositAmount", formatCurrency(value))}
+                    placeholder="R$ 0,00"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 pt-4">

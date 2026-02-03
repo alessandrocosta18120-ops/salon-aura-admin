@@ -427,7 +427,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="whatsappCustomText">Texto personalizado para WhatsApp</Label>
+              <Label htmlFor="whatsappCustomText">Texto de Confirmação de Agendamento para WhatsApp</Label>
               <Textarea
                 id="whatsappCustomText"
                 value={salonData.whatsappCustomText}

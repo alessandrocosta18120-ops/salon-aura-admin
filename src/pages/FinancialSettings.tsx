@@ -27,6 +27,7 @@ interface FinancialData {
   pixKey: string;
   pixKeyType: string;
   additionalInfo: string;
+  paymentInstructions: string;
 }
 
 const FinancialSettings = () => {
@@ -46,6 +47,7 @@ const FinancialSettings = () => {
     pixKey: "",
     pixKeyType: "cpf",
     additionalInfo: "",
+    paymentInstructions: "",
   });
 
   useEffect(() => {
@@ -292,6 +294,30 @@ const FinancialSettings = () => {
                 onChange={(e) => handleInputChange("additionalInfo", e.target.value)}
                 placeholder="Instruções adicionais para pagamento..."
                 rows={4}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Instruções de Pagamento
+            </CardTitle>
+            <CardDescription>
+              Texto exibido ao cliente para pagamento de sinal ou serviço
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="paymentInstructions">Instruções de Pagamento de Sinal/Serviço</Label>
+              <Textarea
+                id="paymentInstructions"
+                value={formData.paymentInstructions}
+                onChange={(e) => handleInputChange("paymentInstructions", e.target.value)}
+                placeholder="Ex: Para confirmar seu agendamento, realize o pagamento do sinal via PIX para a chave indicada acima. Envie o comprovante pelo WhatsApp..."
+                rows={5}
               />
             </div>
           </CardContent>
