@@ -443,21 +443,27 @@ const Dashboard = () => {
                     
                     {slot.appointments.length > 0 ? (
                       <div className="flex flex-wrap gap-2 flex-1">
-                        {slot.appointments.map((apt) => (
-                          <button
-                            key={apt.id}
-                            onClick={() => handleAppointmentClick(apt)}
-                            className="flex items-center gap-2 px-3 py-2 rounded-md text-black text-sm transition-all hover:opacity-80 cursor-pointer"
-                            style={{ backgroundColor: getProfessionalColor(apt.professionalId) }}
-                          >
-                            <User className="h-4 w-4" />
-                            <span className="font-medium">{apt.clientName}</span>
-                            <span className="opacity-90">• {apt.serviceName}</span>
-                            {professionals.length > 1 && (
-                              <span className="opacity-80 text-xs">({apt.professionalName})</span>
-                            )}
-                          </button>
-                        ))}
+                        {slot.appointments.map((apt) => {
+                          const bgColor = getProfessionalColor(apt.professionalId);
+                          return (
+                            <button
+                              key={apt.id}
+                              onClick={() => handleAppointmentClick(apt)}
+                              className="flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-all hover:opacity-80 cursor-pointer text-white font-medium shadow-sm"
+                              style={{ 
+                                backgroundColor: bgColor,
+                                textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                              }}
+                            >
+                              <User className="h-4 w-4" />
+                              <span className="font-semibold">{apt.clientName}</span>
+                              <span className="opacity-90">• {apt.serviceName}</span>
+                              {professionals.length > 1 && (
+                                <span className="opacity-80 text-xs">({apt.professionalName})</span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     ) : (
                       <button

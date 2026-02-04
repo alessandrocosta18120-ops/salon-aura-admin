@@ -36,6 +36,7 @@ interface SalonData {
   secondaryLogo: File | null;
   whatsappCustomText: string;
   evadedClientsReminderText: string;
+  showMap: boolean;
 }
 
 interface Professional {
@@ -108,6 +109,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     secondaryLogo: null,
     whatsappCustomText: "",
     evadedClientsReminderText: "",
+    showMap: false,
   });
   const [emailError, setEmailError] = useState("");
 
@@ -182,7 +184,7 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
     }
   };
 
-  const handleInputChange = (field: keyof SalonData, value: string | File | null) => {
+  const handleInputChange = (field: keyof SalonData, value: string | File | null | boolean) => {
     setSalonData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -460,6 +462,16 @@ const SalonManagement = ({ onBack }: { onBack?: () => void }) => {
                   required
                 />
               </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="showMap"
+                checked={salonData.showMap || false}
+                onCheckedChange={(checked) => handleInputChange("showMap", checked as boolean)}
+              />
+              <Label htmlFor="showMap" className="text-sm font-normal cursor-pointer">
+                Exibir mapa na página
+              </Label>
             </div>
 
             {/* Logo Upload Section */}
