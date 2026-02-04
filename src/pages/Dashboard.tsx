@@ -449,17 +449,17 @@ const Dashboard = () => {
                             <button
                               key={apt.id}
                               onClick={() => handleAppointmentClick(apt)}
-                              className="flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-all hover:opacity-80 cursor-pointer text-white font-medium shadow-sm"
+                              className="flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-all hover:opacity-80 cursor-pointer font-medium shadow-sm border"
                               style={{ 
                                 backgroundColor: bgColor,
-                                textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                                color: '#000000'
                               }}
                             >
                               <User className="h-4 w-4" />
                               <span className="font-semibold">{apt.clientName}</span>
-                              <span className="opacity-90">• {apt.serviceName}</span>
+                              <span>• {apt.serviceName}</span>
                               {professionals.length > 1 && (
-                                <span className="opacity-80 text-xs">({apt.professionalName})</span>
+                                <span className="text-xs">({apt.professionalName})</span>
                               )}
                             </button>
                           );
