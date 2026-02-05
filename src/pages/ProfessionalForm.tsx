@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { X, Upload } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
@@ -14,6 +15,12 @@ import { phoneMask, emailValidation } from "@/lib/masks";
 import { professionalApi } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 import { sessionManager } from "@/lib/session";
+
+interface ProfessionalColor {
+  id: string;
+  name: string;
+  value: string;
+}
 
 interface Professional {
   id?: string;
@@ -25,6 +32,7 @@ interface Professional {
   endTime: string;
   isActive: boolean;
   photoUrl?: string | null;
+  color?: string;
 }
 
 const weekDays = [
@@ -42,6 +50,7 @@ const ProfessionalForm = () => {
   const { id } = useParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [availableColors, setAvailableColors] = useState<ProfessionalColor[]>([]);
   const [formData, setFormData] = useState<Professional>({
     name: "",
     email: "",
@@ -51,13 +60,26 @@ const ProfessionalForm = () => {
     endTime: "",
     isActive: true,
     photoUrl: null,
+    color: "",
   });
 
   useEffect(() => {
+    loadColors();
     if (id) {
       loadProfessional();
     }
   }, [id]);
+
+  const loadColors = async () => {
+    try {
+      const response = await professionalApi.getColors();
+      if (response.success && response.data) {
+        setAvailableColors(response.data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar cores:", error);
+    }
+  };
 
   const loadProfessional = async () => {
     try {
@@ -296,6 +318,31 @@ const ProfessionalForm = () => {
                   onChange={(e) => handleInputChange("endTime", e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="color">Cor do Profissional</Label>
+              <Select
+                value={formData.color || ""}
+                onValueChange={(value) => handleInputChange("color", value)}
+              >
+                <SelectTrigger id="color">
+                  <SelectValue placeholder="Selecione uma cor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableColors.map((color) => (
+                    <SelectItem key={color.id} value={color.value}>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded-full border border-border" 
+                          style={{ backgroundColor: color.value }}
+                        />
+                        <span>{color.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center space-x-2">

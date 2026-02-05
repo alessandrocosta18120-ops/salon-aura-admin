@@ -68,6 +68,7 @@ export const professionalApi = {
   get: () => apiCall('getadmprofessionals'),
   set: (data: any) => apiCall('setadmprofessionals', data, 'POST'),
   delete: (id: string) => apiCall('deleteadmprofessional', { id }, 'POST'),
+  getColors: () => apiCall('getadmprofessionalcolors'),
 };
 
 // Services APIs
