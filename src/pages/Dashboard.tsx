@@ -27,6 +27,7 @@ interface Appointment {
   serviceName: string;
   duration: number;
   status: 'confirmed' | 'pending' | 'cancelled';
+  color?: string;  // Cor do profissional vinda da API
 }
 
 interface Professional {
@@ -183,8 +184,10 @@ const Dashboard = () => {
     return slots;
   }, [openTime, closeTime, slotSize, appointments]);
 
-  // Get color for professional
-  const getProfessionalColor = (professionalId: string): string => {
+  // Get color for professional - prioriza cor do agendamento, depois do profissional, depois fallback
+  const getProfessionalColor = (professionalId: string, appointmentColor?: string): string => {
+    if (appointmentColor) return appointmentColor;  // Usa color direto da API de agendamentos
+    
     const prof = professionals.find(p => p.id === professionalId);
     if (prof?.color) return prof.color;
     
@@ -444,7 +447,7 @@ const Dashboard = () => {
                     {slot.appointments.length > 0 ? (
                       <div className="flex flex-wrap gap-2 flex-1">
                         {slot.appointments.map((apt) => {
-                          const bgColor = getProfessionalColor(apt.professionalId);
+                          const bgColor = getProfessionalColor(apt.professionalId, apt.color);
                           return (
                             <button
                               key={apt.id}
