@@ -24,13 +24,15 @@ import {
   Store,
   UserCog,
   Shield,
+  Globe,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { salonApi } from "@/lib/api";
 import { sessionManager } from "@/lib/session";
 import { Badge } from "@/components/ui/badge";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 
-type UserRole = 'admin' | 'manager' | 'staff';
+type UserRole = 'admin' | 'manager' | 'staff' | 'webmaster';
 
 interface MenuItem {
   title: string;
@@ -52,6 +54,11 @@ const allMenuItems: MenuItem[] = [
   { title: "Gerenciar Usuários", url: "/dashboard/users", icon: Shield, roles: ['admin'] },
 ];
 
+const webmasterMenuItems: MenuItem[] = [
+  { title: "Todos os Salões", url: "/dashboard/webmaster/salons", icon: Globe, roles: ['webmaster'] },
+  { title: "Todos os Usuários", url: "/dashboard/webmaster/users", icon: Users, roles: ['webmaster'] },
+];
+
 function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
@@ -61,19 +68,23 @@ function AppSidebar() {
   
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [userName, setUserName] = useState<string>('');
+  const isImpersonating = sessionManager.isImpersonating();
+  const effectiveRole = isImpersonating ? sessionManager.getOriginalRole() : userRole;
 
   useEffect(() => {
     const session = sessionManager.get();
     if (session) {
-      setUserRole(session.role || 'staff');
+      setUserRole((session.role || 'staff') as UserRole);
       setUserName(session.userName || '');
     }
   }, []);
 
-  // Filter menu items based on user role
-  const visibleMenuItems = allMenuItems.filter(item => 
-    userRole && item.roles.includes(userRole)
-  );
+  // When impersonating, show the target salon's menus; when webmaster, show webmaster menus
+  const visibleMenuItems = isImpersonating
+    ? allMenuItems.filter(item => userRole && item.roles.includes(userRole))
+    : effectiveRole === 'webmaster'
+      ? webmasterMenuItems
+      : allMenuItems.filter(item => userRole && item.roles.includes(userRole));
 
   const getNavClasses = ({ isActive }: { isActive: boolean }) =>
     isActive
@@ -99,6 +110,7 @@ function AppSidebar() {
       case 'admin': return 'Admin';
       case 'manager': return 'Gerente';
       case 'staff': return 'Profissional';
+      case 'webmaster': return 'Webmaster';
       default: return '';
     }
   };
@@ -191,6 +203,7 @@ const DashboardLayout = () => {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
+          <ImpersonationBanner />
           <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-4">
             <div className="flex items-center gap-4">
               <SidebarTrigger />

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { sessionManager } from "@/lib/session";
 import { useToast } from "@/hooks/use-toast";
 
-type UserRole = 'admin' | 'manager' | 'staff';
+type UserRole = 'admin' | 'manager' | 'staff' | 'webmaster';
 
 interface RequireRoleProps {
   allowedRoles: UserRole[];

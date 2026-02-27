@@ -2,13 +2,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { sessionManager } from '@/lib/session';
 
-export type UserRole = 'admin' | 'manager' | 'staff';
+export type UserRole = 'admin' | 'manager' | 'staff' | 'webmaster';
 
 interface UseUserRoleReturn {
   role: UserRole | null;
   isAdmin: boolean;
   isManager: boolean;
   isStaff: boolean;
+  isWebmaster: boolean;
   canManageUsers: boolean;
   canAccessAllMenus: boolean;
   canOnlyAccessOwnData: boolean;
@@ -36,14 +37,16 @@ export const useUserRole = (): UseUserRoleReturn => {
   const isAdmin = role === 'admin';
   const isManager = role === 'manager';
   const isStaff = role === 'staff';
+  const isWebmaster = role === 'webmaster';
 
   return {
     role,
     isAdmin,
     isManager,
     isStaff,
-    canManageUsers: isAdmin,
-    canAccessAllMenus: isAdmin || isManager,
+    isWebmaster,
+    canManageUsers: isAdmin || isWebmaster,
+    canAccessAllMenus: isAdmin || isManager || isWebmaster,
     canOnlyAccessOwnData: isStaff,
     setRole,
   };
