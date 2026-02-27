@@ -47,7 +47,12 @@ const Login = () => {
           sessionStorage.setItem('salon_admin_session', JSON.stringify(sessionData));
         }
         
-        navigate("/dashboard");
+        const role = (result.data?.role || 'staff').toLowerCase();
+        if (role === 'webmaster') {
+          navigate("/dashboard/webmaster/salons");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         throw new Error(result.error || "Credenciais inválidas");
       }

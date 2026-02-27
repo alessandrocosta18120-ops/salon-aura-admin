@@ -24,6 +24,8 @@ import TimeBlocks from "./pages/TimeBlocks";
 import FinancialSettings from "./pages/FinancialSettings";
 import Appointments from "./pages/Appointments";
 import UsersManagement from "./pages/UsersManagement";
+import WebmasterSalons from "./pages/WebmasterSalons";
+import WebmasterUsers from "./pages/WebmasterUsers";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,9 @@ const App = () => (
             <Route path="financial" element={<RequireRole allowedRoles={['admin', 'manager']}><FinancialSettings /></RequireRole>} />
             <Route path="settings" element={<RequireRole allowedRoles={['admin', 'manager']}><Settings /></RequireRole>} />
             <Route path="users" element={<RequireRole allowedRoles={['admin']}><UsersManagement /></RequireRole>} />
+            {/* Webmaster routes */}
+            <Route path="webmaster/salons" element={<RequireRole allowedRoles={['webmaster']}><WebmasterSalons /></RequireRole>} />
+            <Route path="webmaster/users" element={<RequireRole allowedRoles={['webmaster']}><WebmasterUsers /></RequireRole>} />
           </Route>
           <Route path="/" element={<Login />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
